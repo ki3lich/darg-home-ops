@@ -74,9 +74,13 @@ cluster:
     endpoint: https://192.168.1.180:6443
   clusterName: main
   network:
+    cni:
+      name: none
     dnsDomain: cluster.local
     podSubnets: ["10.42.0.0/16"]
     serviceSubnets: ["10.43.0.0/16"]
+  coreDNS:
+    disabled: true
   apiServer:
     image: registry.k8s.io/kube-apiserver:{{ ENV.KUBERNETES_VERSION }}
     extraArgs:
@@ -99,6 +103,8 @@ cluster:
     image: registry.k8s.io/kube-proxy:{{ ENV.KUBERNETES_VERSION }}
   scheduler:
     image: registry.k8s.io/kube-scheduler:{{ ENV.KUBERNETES_VERSION }}
+    extraArgs:
+      bind-address: 0.0.0.0
   etcd:
     extraArgs:
       listen-metrics-urls: http://0.0.0.0:2381
