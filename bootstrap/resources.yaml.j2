@@ -12,7 +12,7 @@ metadata:
   name: onepassword-secret
   namespace: external-secrets
 stringData:
-  token: op://dag-home-ops/1password/OP_CONNECT_TOKEN
+  token: op://darg-home-ops/1password/OP_CONNECT_TOKEN
 ---
 apiVersion: v1
 kind: Secret
@@ -32,8 +32,8 @@ metadata:
     controller.cert-manager.io/fao: "true"
 type: kubernetes.io/tls
 data:
-  tls.crt: op://dag-home-ops/darg-win-tls/tls.crt
-  tls.key: op://dag-home-ops/darg-win-tls/tls.key
+  tls.crt: op://darg-home-ops/devbu-io-tls/tls.crt
+  tls.key: op://darg-home-ops/devbu-io-tls/tls.key
 ---
 apiVersion: v1
 kind: Secret
@@ -41,4 +41,4 @@ metadata:
   name: cloudflare-tunnel-id-secret
   namespace: network
 stringData:
-  CLOUDFLARE_TUNNEL_ID: op://dag-home-ops/cloudflare/CLOUDFLARE_TUNNEL_ID
+  CLOUDFLARE_TUNNEL_ID: op://darg-home-ops/cloudflare/CLOUDFLARE_TUNNEL_ID
