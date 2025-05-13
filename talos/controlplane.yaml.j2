@@ -2,10 +2,10 @@ version: v1alpha1
 debug: false
 persist: true
 machine:
-  token: op://kubernetes/talos/MACHINE_TOKEN
+  token: op://darg-home-ops/talos/MACHINE_TOKEN
   ca:
-    crt: op://kubernetes/talos/MACHINE_CA_CRT
-    key: op://kubernetes/talos/MACHINE_CA_KEY
+    crt: op://darg-home-ops/talos/MACHINE_CA_CRT
+    key: op://darg-home-ops/talos/MACHINE_CA_KEY
   certSANs: ["127.0.0.1", "192.168.1.180"]
   kubelet:
     image: ghcr.io/siderolabs/kubelet:{{ ENV.KUBERNETES_VERSION }}
@@ -74,8 +74,8 @@ machine:
     topology.kubernetes.io/region: main
     topology.kubernetes.io/zone: m
 cluster:
-  id: op://kubernetes/talos/CLUSTER_ID
-  secret: op://kubernetes/talos/CLUSTER_SECRET
+  id: op://darg-home-ops/talos/CLUSTER_ID
+  secret: op://darg-home-ops/talos/CLUSTER_SECRET
   controlPlane:
     endpoint: https://192.168.1.180:6443
   clusterName: main
@@ -87,16 +87,16 @@ cluster:
     serviceSubnets: ["10.43.0.0/16"]
   coreDNS:
     disabled: true
-  token: op://kubernetes/talos/CLUSTER_TOKEN
-  secretboxEncryptionSecret: op://kubernetes/talos/CLUSTER_SECRETBOXENCRYPTIONSECRET
+  token: op://darg-home-ops/talos/CLUSTER_TOKEN
+  secretboxEncryptionSecret: op://darg-home-ops/talos/CLUSTER_SECRETBOXENCRYPTIONSECRET
   ca:
-    crt: op://kubernetes/talos/CLUSTER_CA_CRT
-    key: op://kubernetes/talos/CLUSTER_CA_KEY
+    crt: op://darg-home-ops/talos/CLUSTER_CA_CRT
+    key: op://darg-home-ops/talos/CLUSTER_CA_KEY
   aggregatorCA:
-    crt: op://kubernetes/talos/CLUSTER_AGGREGATORCA_CRT
-    key: op://kubernetes/talos/CLUSTER_AGGREGATORCA_KEY
+    crt: op://darg-home-ops/talos/CLUSTER_AGGREGATORCA_CRT
+    key: op://darg-home-ops/talos/CLUSTER_AGGREGATORCA_KEY
   serviceAccount:
-    key: op://kubernetes/talos/CLUSTER_SERVICEACCOUNT_KEY
+    key: op://darg-home-ops/talos/CLUSTER_SERVICEACCOUNT_KEY
   apiServer:
     image: registry.k8s.io/kube-apiserver:{{ ENV.KUBERNETES_VERSION }}
     extraArgs:
@@ -123,8 +123,8 @@ cluster:
       bind-address: 0.0.0.0
   etcd:
     ca:
-      crt: op://kubernetes/talos/CLUSTER_ETCD_CA_CRT
-      key: op://kubernetes/talos/CLUSTER_ETCD_CA_KEY
+      crt: op://darg-home-ops/talos/CLUSTER_ETCD_CA_CRT
+      key: op://darg-home-ops/talos/CLUSTER_ETCD_CA_KEY
     extraArgs:
       listen-metrics-urls: http://0.0.0.0:2381
     advertisedSubnets: ["192.168.1.0/24"]
