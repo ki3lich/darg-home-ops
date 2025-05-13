@@ -10,47 +10,54 @@ export ROOT_DIR="$(git rev-parse --show-toplevel)"
 function apply_talos_config() {
     log debug "Applying Talos configuration"
 
-    local talos_controlplane_file="${ROOT_DIR}/talos/controlplane.yaml.j2"
-    local talos_worker_file="${ROOT_DIR}/talos/worker.yaml.j2"
+    local controlplane_file="${ROOT_DIR}/talos/controlplane.yaml.j2"
+    local worker_file="${ROOT_DIR}/talos/worker.yaml.j2"
 
-    if [[ ! -f ${talos_controlplane_file} ]]; then
-        log error "No Talos machine files found for controlplane" "file=${talos_controlplane_file}"
+    if [[ ! -f ${controlplane_file} ]]; then
+        log error "No Talos machine files found for controlplane" "file=${controlplane_file}"
     fi
 
-    # Skip worker configuration if no worker file is found
-    if [[ ! -f ${talos_worker_file} ]]; then
-        log warn "No Talos machine files found for worker" "file=${talos_worker_file}"
-        talos_worker_file=""
+    if [[ ! -f ${worker_file} ]]; then
+        log warn "No Talos machine files found for worker" "file=${worker_file}"
     fi
+
+    if ! nodes=$(talosctl config info --output json 2>/dev/null | jq --exit-status --raw-output '.nodes | join(" ")') || [[ -z "${nodes}" ]]; then
+        log error "No Talos nodes found"
+    fi
+
+    # Check that all nodes have a Talos configuration file
+    for node in ${nodes}; do
+        local node_file="${ROOT_DIR}/talos/nodes/${node}.yaml.j2"
+
+        if [[ ! -f "${node_file}" ]]; then
+            log error "No Talos machine files found for node" "node=${node}" file="${node_file}"
+        fi
+    done
 
     # Apply the Talos configuration to the controlplane and worker nodes
-    for file in ${talos_controlplane_file} ${talos_worker_file}; do
-        if ! nodes=$(talosctl config info --output json 2>/dev/null | jq --exit-status --raw-output '.nodes | join(" ")') || [[ -z "${nodes}" ]]; then
-            log error "No Talos nodes found"
+    for node in ${nodes}; do
+        local node_file="${ROOT_DIR}/talos/nodes/${node}.yaml.j2"
+
+        local machine_type
+        machine_type=$(yq '.machine.type' "${node_file}")
+
+        log debug "Applying Talos node configuration" "node=${node}" "machine_type=${machine_type}"
+
+        if ! machine_config=$(bash "${ROOT_DIR}/scripts/render-machine-config.sh" "${ROOT_DIR}/talos/${machine_type}.yaml.j2" "${node_file}") || [[ -z "${machine_config}" ]]; then
+            exit 1
         fi
 
-        log debug "Talos nodes discovered" "nodes=${nodes}"
+        log info "Talos node configuration rendered successfully" "node=${node}"
 
-        # Apply the Talos configuration
-        for node in ${nodes}; do
-            log debug "Applying Talos node configuration" "node=${node}"
-
-            if ! machine_config=$(bash "${ROOT_DIR}/scripts/render-machine-config.sh" "${file}" "${ROOT_DIR}/talos/nodes/${node}.yaml.j2") || [[ -z "${machine_config}" ]]; then
-                exit 1
+        if ! output=$(echo "${machine_config}" | talosctl --nodes "${node}" apply-config --insecure --file /dev/stdin 2>&1); then
+            if [[ "${output}" == *"certificate required"* ]]; then
+                log warn "Talos node is already configured, skipping apply of config" "node=${node}"
+                continue
             fi
+            log error "Failed to apply Talos node configuration" "node=${node}" "output=${output}"
+        fi
 
-            log info "Talos node configuration rendered successfully" "node=${node}"
-
-            if ! output=$(echo "${machine_config}" | talosctl --nodes "${node}" apply-config --insecure --file /dev/stdin 2>&1); then
-                if [[ "${output}" == *"certificate required"* ]]; then
-                    log warn "Talos node is already configured, skipping apply of config" "node=${node}"
-                    continue
-                fi
-                log error "Failed to apply Talos node configuration" "node=${node}" "output=${output}"
-            fi
-
-            log info "Talos node configuration applied successfully" "node=${node}"
-        done
+        log info "Talos node configuration applied successfully" "node=${node}"
     done
 }
 
@@ -58,26 +65,18 @@ function apply_talos_config() {
 function bootstrap_talos() {
     log debug "Bootstrapping Talos"
 
-    local bootstrapped=true
-
     if ! controller=$(talosctl config info --output json | jq --exit-status --raw-output '.endpoints[]' | shuf -n 1) || [[ -z "${controller}" ]]; then
         log error "No Talos controller found"
     fi
 
     log debug "Talos controller discovered" "controller=${controller}"
 
-    until output=$(talosctl --nodes "${controller}" bootstrap 2>&1); do
-        if [[ "${bootstrapped}" == true && "${output}" == *"AlreadyExists"* ]]; then
-            log info "Talos is bootstrapped" "controller=${controller}"
-            break
-        fi
-
-        # Set bootstrapped to false after the first attempt
-        bootstrapped=false
-
-        log info "Talos bootstrap failed, retrying in 10 seconds..." "controller=${controller}"
+    until output=$(talosctl --nodes "${controller}" bootstrap 2>&1 || true) && [[ "${output}" == *"AlreadyExists"* ]]; do
+        log info "Talos bootstrap in progress, waiting 10 seconds..." "controller=${controller}"
         sleep 10
     done
+
+    log info "Talos is bootstrapped" "controller=${controller}"
 }
 
 # Fetch the kubeconfig from a controller node
@@ -117,12 +116,12 @@ function apply_crds() {
     log debug "Applying CRDs"
 
     local -r crds=(
-        # renovate: datasource=github-releases depName=kubernetes-sigs/gateway-api
-        https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.2.1/experimental-install.yaml
-        # renovate: datasource=github-releases depName=prometheus-operator/prometheus-operator
-        https://github.com/prometheus-operator/prometheus-operator/releases/download/v0.81.0/stripped-down-crds.yaml
         # renovate: datasource=github-releases depName=kubernetes-sigs/external-dns
         https://raw.githubusercontent.com/kubernetes-sigs/external-dns/refs/tags/v0.16.1/docs/sources/crd/crd-manifest.yaml
+        # renovate: datasource=github-releases depName=kubernetes-sigs/gateway-api
+        https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.3.0/experimental-install.yaml
+        # renovate: datasource=github-releases depName=prometheus-operator/prometheus-operator
+        https://github.com/prometheus-operator/prometheus-operator/releases/download/v0.82.2/stripped-down-crds.yaml
     )
 
     for crd in "${crds[@]}"; do
@@ -160,6 +159,43 @@ function apply_resources() {
     fi
 }
 
+# Disks in use by rook-ceph must be wiped before Rook is installed
+function wipe_rook_disks() {
+    log debug "Wiping Rook disks"
+
+    # Skip disk wipe if Rook is detected running in the cluster
+    # NOTE: Is there a better way to detect Rook / OSDs?
+    if kubectl --namespace rook-ceph get kustomization rook-ceph &>/dev/null; then
+        log warn "Rook is detected running in the cluster, skipping disk wipe"
+        return
+    fi
+
+    if ! nodes=$(talosctl config info --output json 2>/dev/null | jq --exit-status --raw-output '.nodes | join(" ")') || [[ -z "${nodes}" ]]; then
+        log error "No Talos nodes found"
+    fi
+
+    log debug "Talos nodes discovered" "nodes=${nodes}"
+
+    # Wipe disks on each node that match the ROOK_DISK environment variable
+    for node in ${nodes}; do
+        if ! disks=$(talosctl --nodes "${node}" get disk --output json 2>/dev/null |
+            jq --exit-status --raw-output --slurp '. | map(select(.spec.model == env.ROOK_DISK) | .metadata.id) | join(" ")') || [[ -z "${nodes}" ]]; then
+            log error "No disks found" "node=${node}" "model=${ROOK_DISK}"
+        fi
+
+        log debug "Talos node and disk discovered" "node=${node}" "disks=${disks}"
+
+        # Wipe each disk on the node
+        for disk in ${disks}; do
+            if talosctl --nodes "${node}" wipe disk "${disk}" &>/dev/null; then
+                log info "Disk wiped" "node=${node}" "disk=${disk}"
+            else
+                log error "Failed to wipe disk" "node=${node}" "disk=${disk}"
+            fi
+        done
+    done
+}
+
 # Apply Helm releases using helmfile
 function apply_helm_releases() {
     log debug "Applying Helm releases with helmfile"
@@ -178,7 +214,7 @@ function apply_helm_releases() {
 }
 
 function main() {
-    check_env KUBECONFIG KUBERNETES_VERSION TALOS_VERSION
+    check_env KUBECONFIG KUBERNETES_VERSION ROOK_DISK TALOS_VERSION
     check_cli helmfile jq kubectl kustomize minijinja-cli op talosctl yq
 
     if ! op whoami --format=json &>/dev/null; then
@@ -192,6 +228,7 @@ function main() {
 
     # Apply resources and Helm releases
     wait_for_nodes
+    # wipe_rook_disks
     apply_crds
     apply_resources
     apply_helm_releases
