@@ -14,6 +14,7 @@ tasks:
     requires:
       vars: [IP]
     preconditions:
+      - op signin
       # - talosctl --nodes {{.IP}} get machineconfig
       - test -f {{.SCRIPTS_DIR}}/render-machine-config.sh
       - which talosctl
