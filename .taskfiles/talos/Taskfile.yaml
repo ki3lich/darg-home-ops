@@ -1,22 +1,20 @@
 ---
 # yaml-language-server: $schema=https://taskfile.dev/schema.json
-version: '3'
+version: "3"
 
 tasks:
-
   apply-node:
     desc: Apply Talos config to a node [IP=required] [MODE=auto]
     cmd: |
       bash {{.SCRIPTS_DIR}}/render-machine-config.sh {{.TALOS_DIR}}/{{.MACHINE_TYPE}}.yaml.j2 {{.TALOS_DIR}}/nodes/{{.IP}}.yaml.j2 \
-        | talosctl --nodes {{.IP}} apply-config --mode {{.MODE}} --file /dev/stdin
+        | talosctl --nodes {{.IP}} apply-config --insecure --mode {{.MODE}} --file /dev/stdin
     vars:
       MODE: '{{.MODE | default "auto"}}'
-      MACHINE_TYPE:
-        sh: talosctl --nodes {{.IP}} get machinetypes --output=jsonpath='{.spec}'
+      MACHINE_TYPE: controlplane
     requires:
       vars: [IP]
     preconditions:
-      - talosctl --nodes {{.IP}} get machineconfig
+      # - talosctl --nodes {{.IP}} get machineconfig
       - test -f {{.SCRIPTS_DIR}}/render-machine-config.sh
       - which talosctl
 
