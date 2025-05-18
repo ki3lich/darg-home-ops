@@ -117,8 +117,8 @@ function perform_replacements_in_files
                 -e 's/isDefaultClass:\ false/isDefaultClass:\ true/g' \
                 -e s/America\\/New_York/Europe\\/Warsaw/g \
                 -e s/csi-//g \
-                -e s/ceph-block/openebs-hostpath/g "$file_relative_path" \
-                else
+                -e s/ceph-block/openebs-hostpath/g "$file_relative_path"
+        else
             echo "Warning: $file_relative_path is not a regular file or was removed. Skipping sed."
         end
     end
