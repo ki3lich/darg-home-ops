@@ -3,19 +3,28 @@
 version: "3"
 
 tasks:
+  get-config:
+    desc: Get talos config
+    cmds:
+      - op read op://darg-home-ops/talos/secrets.yaml | talosctl gen config main https://192.168.1.203:6443 -t talosconfig --force --with-secrets /dev/stdin
+      - yq eval '.contexts.main.endpoints += ["192.168.1.203"]' -i talosconfig
+    preconditions:
+      - op signin
+
   apply-node:
     desc: Apply Talos config to a node [IP=required] [MODE=auto]
     cmd: |
       bash {{.SCRIPTS_DIR}}/render-machine-config.sh {{.TALOS_DIR}}/{{.MACHINE_TYPE}}.yaml.j2 {{.TALOS_DIR}}/nodes/{{.IP}}.yaml.j2 \
-        | talosctl --nodes {{.IP}} apply-config --insecure --mode {{.MODE}} --file /dev/stdin
+        | talosctl --nodes {{.IP}} apply-config --mode {{.MODE}} {{.EXTRA_ARGS}} --file /dev/stdin
     vars:
       MODE: '{{.MODE | default "auto"}}'
+      #rpc error: code = Unavailable desc = connection error: desc = "transport: authentication handshake failed: tls: failed to verify certificate: x509: certificate signed by unknown authority"
       MACHINE_TYPE: controlplane
+      EXTRA_ARGS: '{{.EXTRA_ARGS | default ""}}'
     requires:
       vars: [IP]
     preconditions:
       - op signin
-      # - talosctl --nodes {{.IP}} get machineconfig
       - test -f {{.SCRIPTS_DIR}}/render-machine-config.sh
       - which talosctl
 
