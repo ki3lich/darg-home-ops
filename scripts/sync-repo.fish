@@ -102,6 +102,7 @@ function perform_replacements_in_files
                 -e s/onedr0p/ki3lich/g \
                 -e s/devbu-io/darg-win/g \
                 -e 's/copyMethod:\ Snapshot/copyMethod:\ Direct/g' \
+                -e 's/=Snapshot/=Direct/g' \
                 -e 's/devbu\.io/darg\.win/g' \
                 -e s/VOLSYNC_CACHE_SNAPSHOTCLASS/VOLSYNC_CACHE_STORAGECLASS//g \
                 -e 's/op:\/\/kubernetes/op:\/\/darg-home-ops/g' \
