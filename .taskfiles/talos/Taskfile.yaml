@@ -3,11 +3,12 @@
 version: "3"
 
 tasks:
-  get-config:
-    desc: Get talos config
+  gen-config:
+    desc: Gen talos config
     cmds:
       - op read op://darg-home-ops/talos/secrets.yaml | talosctl gen config main https://192.168.1.203:6443 -t talosconfig --force --with-secrets /dev/stdin
       # TODO: generate endpoint list
+      - talosctl config node 192.168.1.203
       - yq eval '.contexts.main.endpoints += ["192.168.1.203"]' -i talosconfig
     preconditions:
       - op signin
