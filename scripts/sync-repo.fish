@@ -115,7 +115,7 @@ if not git clone --depth 1 "$remote_repo_url" "$temp_clone_dir"
 end
 
 # Determine script path relative to git root for exclusion
-set script_relative_path_to_git_root (realpath --relative-to="$git_root" "$current_script_absolute_path")
+set script_relative_path_to_git_root (python3 -c "import os; print(os.path.relpath('$current_script_absolute_path', '$git_root'))")
 
 # Copy files from the cloned repo to the current directory
 echo "Synchronizing files from $temp_clone_dir to $git_root..."
