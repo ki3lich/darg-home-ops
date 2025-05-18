@@ -103,6 +103,7 @@ function perform_replacements_in_files
                 -e s/devbu-io/darg-win/g \
                 -e 's/copyMethod:\ Snapshot/copyMethod:\ Direct/g' \
                 -e 's/=Snapshot/=Direct/g' \
+                -e 's/volumeSnapshotClassName:/#\ volumeSnapshotClassName:/g' \
                 -e 's/devbu\.io/darg\.win/g' \
                 -e s/VOLSYNC_CACHE_SNAPSHOTCLASS/VOLSYNC_CACHE_STORAGECLASS/g \
                 -e 's/op:\/\/kubernetes/op:\/\/darg-home-ops/g' \
@@ -156,7 +157,7 @@ if command -v rsync >/dev/null
         kubernetes/apps/default/cross-seed/ \
         kubernetes/apps/default/fusion/ \
         kubernetes/apps/default/go2rtc/ \
-        kubernetes/apps/default/mosquitto/ \
+        kubernetes/apps/default/jellyseerr/ \
         kubernetes/apps/default/pinchflat/ \
         kubernetes/apps/default/plex/ \
         kubernetes/apps/default/prowlarr/ \
@@ -173,17 +174,8 @@ if command -v rsync >/dev/null
         kubernetes/apps/kube-system/csi-driver-nfs/ \
         kubernetes/apps/kube-system/descheduler/ \
         kubernetes/apps/kube-system/intel-device-plugin-operator/ \
-        kubernetes/apps/kube-system/metrics-server/ \
-        kubernetes/apps/kube-system/reloader/ \
+        kubernetes/apps/kube-system/spegel/ \
         kubernetes/apps/kube-system/snapshot-controller/ \
-        kubernetes/apps/observability/blackbox-exporter/ \
-        kubernetes/apps/observability/gatus/ \
-        kubernetes/apps/observability/kromgo/ \
-        kubernetes/apps/observability/kube-prometheus-stack/ \
-        kubernetes/apps/observability/loki/ \
-        kubernetes/apps/observability/promtail/ \
-        kubernetes/apps/observability/silence-operator/ \
-        kubernetes/apps/observability/unpoller/ \
         ".sops.yaml" \
         LICENSE \
         "README.md"
