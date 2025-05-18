@@ -105,13 +105,17 @@ function perform_replacements_in_files
                 -e 's/=Snapshot/=Direct/g' \
                 -e 's/volumeSnapshotClassName:/#\ volumeSnapshotClassName:/g' \
                 -e 's/devbu\.io/darg\.win/g' \
-                -e s/rook-ceph/openebs-system/g \
                 -e s/rook-ceph-cluster/openebs/g \
+                -e s/rook-ceph/openebs-system/g \
                 -e s/VOLSYNC_CACHE_SNAPSHOTCLASS/VOLSYNC_CACHE_STORAGECLASS/g \
                 -e 's/op:\/\/kubernetes/op:\/\/darg-home-ops/g' \
                 -e 's/192\.168\.42\.120/192.168.1.203/g' \
+                -e 's/192\.168\.42\.129/192.168.1.188/g' \
+                -e 's/192\.168\.42\.126/192.168.1.75/g' \
+                -e 's/192\.168\.42\.121/192.168.1.76/g' \
                 -e 's/192\.168\.42\.0/192.168.1.0/g' \
-                -e s/America\/New_York/Europe\/Warsaw/g \
+                -e 's/isDefaultClass:\ false/isDefaultClass:\ true/g' \
+                -e s/America\\/New_York/Europe\\/Warsaw/g \
                 -e s/csi-//g \
                 -e s/ceph-block/openebs-hostpath/g "$file_relative_path" \
                 else
