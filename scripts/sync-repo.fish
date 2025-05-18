@@ -73,7 +73,22 @@ function cleanup_temp_dir --on-event fish_exit
     end
 end
 
-# --- Main Script Execution ---
+# Function to perform replacements in files
+function perform_replacements_in_files
+    set files_to_modify (find . -type f) # Adjust this to target specific files if needed
+
+    for file in $files_to_modify
+        if test -f "$file"
+            sed -i '' -e 's/onedr0p\/home-ops/ki3lich\/darg-home-ops/g' \
+                -e s/devbu-io/darg-win/g \
+                -e 's/devbu\.io/darg\.win/g' \
+                -e 's/op:\/\/kubernetes/op:\/\/darg-home-ops/g' \
+                -e 's/192\.168\.42\.120/192.168.1.203/g' \
+                -e 's/192\.168\.42\.0/192.168.1./g' \
+                -e s/ceph-block/openebs-hostpath/g "$file"
+        end
+    end
+end
 
 # Navigate to Git repository root
 set git_root (git rev-parse --show-toplevel)
