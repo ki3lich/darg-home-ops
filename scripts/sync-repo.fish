@@ -13,6 +13,7 @@ argparse h/help c/clean -- $argv
 or begin
     echo "Usage: "(basename (status --current-filename))" [--clean] [--help]"
     exit 1
+    set LANG $original_locale
 end
 
 if set -q _flag_help
@@ -77,6 +78,8 @@ end
 function perform_replacements_in_files
     set files_to_modify (find . -type f) # Adjust this to target specific files if needed
 
+    set -l original_locale $LANG
+    set LANG "C"
     for file in $files_to_modify
         if test -f "$file"
             sed -i '' -e 's/onedr0p\/home-ops/ki3lich\/darg-home-ops/g' \
