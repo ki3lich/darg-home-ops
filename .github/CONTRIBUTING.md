@@ -8,7 +8,7 @@ Before you start contributing, please make sure you have read and understood our
 
 1. Fork the Repository
 
-First, fork the [repository](https://github.com/onedr0p/home-ops) to your own GitHub account. This will create a copy of the project under your account.
+First, fork the [repository](https://github.com/ki3lich/darg-home-ops) to your own GitHub account. This will create a copy of the project under your account.
 
 2. Clone the Repository
 
