@@ -99,6 +99,7 @@ function perform_replacements_in_files
         # Check if it's a regular file before attempting sed
         if test -f "$file_relative_path"
             sed -i '' -e 's/onedr0p\/home-ops/ki3lich\/darg-home-ops/g' \
+                -e s/onedr0p/ki3lich/g \
                 -e s/devbu-io/darg-win/g \
                 -e 's/devbu\.io/darg\.win/g' \
                 -e 's/op:\/\/kubernetes/op:\/\/darg-home-ops/g' \
