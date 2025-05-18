@@ -112,7 +112,8 @@ function perform_replacements_in_files
                     echo "Skipping binary/non-text file $file_path (MIME type: $mime_type)"
                 else if test -z "$mime_type"
                     echo "Skipping file $file_path (could not determine MIME type or not text)"
-                end # else, octet-stream or empty, might be text, try anyway or refine check
+                # else, octet-stream or empty, might be text, try anyway or refine check
+                end
             end
         else
             echo "Warning: 'file' command not found. Attempting replacements on $file_path without MIME type check."
