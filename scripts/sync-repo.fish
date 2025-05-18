@@ -13,7 +13,7 @@ argparse h/help c/clean -- $argv
 or begin
     echo "Usage: "(basename (status --current-filename))" [--clean] [--help]"
     exit 1
-    set LANG $original_locale
+    # LANG is not set here, so no need to restore original_locale
 end
 
 if set -q _flag_help
@@ -76,21 +76,40 @@ end
 
 # Function to perform replacements in files
 function perform_replacements_in_files
-    set files_to_modify (find . -type f) # Adjust this to target specific files if needed
+    set files_to_modify (find . -type f)
 
     set -l original_locale $LANG
-    set LANG "C"
-    for file in $files_to_modify
-        if test -f "$file"
+    set LANG C
+    for file_relative_path in $files_to_modify
+        set file_absolute_path ""
+        # Try to get the absolute path; handle potential errors if realpath fails
+        if set -l resolved_path (realpath "$file_relative_path" 2>/dev/null)
+            set file_absolute_path $resolved_path
+        else
+            echo "Warning: Could not resolve path for $file_relative_path. Skipping."
+            continue
+        end
+
+        # Skip if the file is the script itself
+        if test "$file_absolute_path" = "$current_script_absolute_path"
+            echo "Skipping replacement in the script itself: $file_relative_path"
+            continue
+        end
+
+        # Check if it's a regular file before attempting sed
+        if test -f "$file_relative_path"
             sed -i '' -e 's/onedr0p\/home-ops/ki3lich\/darg-home-ops/g' \
                 -e s/devbu-io/darg-win/g \
                 -e 's/devbu\.io/darg\.win/g' \
                 -e 's/op:\/\/kubernetes/op:\/\/darg-home-ops/g' \
                 -e 's/192\.168\.42\.120/192.168.1.203/g' \
                 -e 's/192\.168\.42\.0/192.168.1./g' \
-                -e s/ceph-block/openebs-hostpath/g "$file"
+                -e s/ceph-block/openebs-hostpath/g "$file_relative_path"
+        else
+            echo "Warning: $file_relative_path is not a regular file or was removed. Skipping sed."
         end
     end
+    set LANG $original_locale # Restore original locale
 end
 
 # Navigate to Git repository root
