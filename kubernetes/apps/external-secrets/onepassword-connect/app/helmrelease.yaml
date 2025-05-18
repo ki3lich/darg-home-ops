@@ -32,7 +32,11 @@ spec:
               OP_HTTP_PORT: &apiPort 8080
               OP_BUS_PORT: 11220
               OP_BUS_PEERS: localhost:11221
-              OP_SESSION: aHVudGVyMgo=
+              OP_SESSION:
+                valueFrom:
+                  secretKeyRef:
+                    name: onepassword-secret
+                    key: 1password-credentials.json
             probes:
               liveness:
                 enabled: true
