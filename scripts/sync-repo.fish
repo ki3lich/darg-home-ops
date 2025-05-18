@@ -105,10 +105,13 @@ function perform_replacements_in_files
                 -e 's/=Snapshot/=Direct/g' \
                 -e 's/volumeSnapshotClassName:/#\ volumeSnapshotClassName:/g' \
                 -e 's/devbu\.io/darg\.win/g' \
+                -e s/rook-ceph/openebs-system/g \
+                -e s/rook-ceph-cluster/openebs/g \
                 -e s/VOLSYNC_CACHE_SNAPSHOTCLASS/VOLSYNC_CACHE_STORAGECLASS/g \
                 -e 's/op:\/\/kubernetes/op:\/\/darg-home-ops/g' \
                 -e 's/192\.168\.42\.120/192.168.1.203/g' \
-                -e 's/192\.168\.42\.0/192.168.1./g' \
+                -e 's/192\.168\.42\.0/192.168.1.0/g' \
+                -e s/America\/New_York/Europe\/Warsaw/g \
                 -e s/csi-//g \
                 -e s/ceph-block/openebs-hostpath/g "$file_relative_path" \
                 else
@@ -176,6 +179,7 @@ if command -v rsync >/dev/null
         kubernetes/apps/kube-system/intel-device-plugin-operator/ \
         kubernetes/apps/kube-system/spegel/ \
         kubernetes/apps/kube-system/snapshot-controller/ \
+        kubernetes/apps/rook-ceph/ \
         ".sops.yaml" \
         LICENSE \
         "README.md"
