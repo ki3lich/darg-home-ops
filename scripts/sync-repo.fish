@@ -104,13 +104,13 @@ function perform_replacements_in_files
                 -e 's/copyMethod:\ Snapshot/copyMethod:\ Direct/g' \
                 -e 's/=Snapshot/=Direct/g' \
                 -e 's/devbu\.io/darg\.win/g' \
-                -e s/VOLSYNC_CACHE_SNAPSHOTCLASS/VOLSYNC_CACHE_STORAGECLASS//g \
+                -e s/VOLSYNC_CACHE_SNAPSHOTCLASS/VOLSYNC_CACHE_STORAGECLASS/g \
                 -e 's/op:\/\/kubernetes/op:\/\/darg-home-ops/g' \
                 -e 's/192\.168\.42\.120/192.168.1.203/g' \
                 -e 's/192\.168\.42\.0/192.168.1./g' \
+                -e s/csi-//g \
                 -e s/ceph-block/openebs-hostpath/g "$file_relative_path" \
-                -e s/csi-//g
-        else
+                else
             echo "Warning: $file_relative_path is not a regular file or was removed. Skipping sed."
         end
     end
