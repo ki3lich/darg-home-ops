@@ -107,7 +107,8 @@ function perform_replacements_in_files
                 -e 's/op:\/\/kubernetes/op:\/\/darg-home-ops/g' \
                 -e 's/192\.168\.42\.120/192.168.1.203/g' \
                 -e 's/192\.168\.42\.0/192.168.1./g' \
-                -e s/ceph-block/openebs-hostpath/g "$file_relative_path"
+                -e s/ceph-block/openebs-hostpath/g "$file_relative_path" \
+                -e s/csi-//g
         else
             echo "Warning: $file_relative_path is not a regular file or was removed. Skipping sed."
         end
