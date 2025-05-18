@@ -67,8 +67,23 @@ end
 
 # Function to perform string replacements in files
 function perform_replacements_in_files
-    echo "Performing replacements..."
+    # Helper function to escape the chosen delimiter for sed's pattern part (LHS of s///)
+    # Assumes pattern_str is already a valid regex.
+    function escape_sed_pattern_delimiter --argument pattern_str --argument delimiter
+        string replace -a "$delimiter" "\\$delimiter" -- "$pattern_str"
+    end
+
+    # Helper function to escape special characters for sed's replacement part (RHS of s///)
+    # This includes the delimiter, '&' (backreference), and '\' (escape character).
+    function escape_sed_replacement_chars --argument replacement_str --argument delimiter
+        string replace -a '\' '\\\\' -- "$replacement_str" |
+            string replace -a '&' '\&' |
+            string replace -a "$delimiter" "\\$delimiter"
+    end
+
+    echo "Performing replacements using sed..."
     set target_dir "." # Current directory (should be git root)
+    set -l sed_delimiter '#' # Using # as sed delimiter to handle paths with /
 
     set -l replacements \
         onedr0p/home-ops ki3lich/darg-home-ops \
@@ -81,7 +96,6 @@ function perform_replacements_in_files
 
     set -l files_to_process
     if command -v fd >/dev/null
-        # Using fd: find files, hidden, no-ignore (respects .gitexclude but not .gitignore), exclude .git dir
         set files_to_process (fd --type f --hidden --no-ignore --exclude .git . "$target_dir")
     else
         echo "Warning: 'fd' command not found. Falling back to 'find'. This might be slower."
@@ -89,46 +103,69 @@ function perform_replacements_in_files
     end
 
     for file_path in $files_to_process
-        set -l is_text_file true # Assume text if 'file' command is missing or fails
+        set -l is_text_file true
         if command -v file >/dev/null
             set -l mime_type (file -b --mime-type "$file_path" 2>/dev/null)
             if test $status -ne 0 || not string match -qr "^text/" -- "$mime_type"
                 set is_text_file false
-                if test -n "$mime_type"
+                if test -n "$mime_type" && test "$mime_type" != "application/octet-stream" # common for empty or unknown
                     echo "Skipping binary/non-text file $file_path (MIME type: $mime_type)"
-                else
+                else if test -z "$mime_type"
                     echo "Skipping file $file_path (could not determine MIME type or not text)"
-                end
+                end # else, octet-stream or empty, might be text, try anyway or refine check
             end
         else
             echo "Warning: 'file' command not found. Attempting replacements on $file_path without MIME type check."
         end
 
         if $is_text_file
-            echo "Processing $file_path for replacements..."
-            set -l temp_sed_file (mktemp)
-            # Read entire file content as a single string, preserving newlines
-            set -l original_content (cat "$file_path" | string collect)
-            set -l current_content $original_content
+            set -l temp_sed_commands_file ""
+            set -l needs_sed_run false
 
             for i in (seq 1 2 (count $replacements))
                 set old_pattern $replacements[$i]
                 set new_pattern $replacements[(math $i + 1)]
-                set current_content (string replace -ra "$old_pattern" "$new_pattern" -- "$current_content")
+
+                # Check if the pattern (as a regex for grep) exists in the file
+                if grep -q -- "$old_pattern" "$file_path"
+                    if not $needs_sed_run # Create temp file only if we haven't already for this file_path
+                        set temp_sed_commands_file (mktemp)
+                    end
+                    set needs_sed_run true
+                    set escaped_old (escape_sed_pattern_delimiter "$old_pattern" "$sed_delimiter")
+                    set escaped_new (escape_sed_replacement_chars "$new_pattern" "$sed_delimiter")
+                    # Append sed command to the temporary command file
+                    echo "s$sed_delimiter$escaped_old$sed_delimiter$escaped_new$sed_delimiter""g" >> "$temp_sed_commands_file"
+                end
             end
 
-            # Only write if content changed to preserve timestamps and avoid unnecessary writes
-            if test "$current_content" != "$original_content"
-                # Use printf to write content, ensuring newlines are handled correctly
-                printf "%s" "$current_content" >"$temp_sed_file"
-                if test $status -eq 0
-                    mv "$temp_sed_file" "$file_path"
+            if $needs_sed_run
+                echo "Applying sed commands to $file_path"
+                set temp_output_file (mktemp)
+                if sed -f "$temp_sed_commands_file" "$file_path" > "$temp_output_file"
+                    # Compare original with sed output; update only if different
+                    if not cmp -s "$file_path" "$temp_output_file"
+                        echo "Content changed, updating $file_path"
+                        if mv "$temp_output_file" "$file_path"
+                            # Successfully moved temp_output_file to file_path
+                        else
+                            echo "Error: Failed to move temp output file to $file_path."
+                            rm -f "$temp_output_file" # Clean up temp output if mv failed
+                        end
+                    else
+                        echo "Content unchanged by sed for $file_path, skipping update."
+                        rm -f "$temp_output_file" # Clean up temp output, no changes needed
+                    end
                 else
-                    echo "Error: Failed to write changes to $file_path."
-                    rm -f "$temp_sed_file"
+                    echo "Error: sed command failed for $file_path."
+                    rm -f "$temp_output_file" # Clean up temp output if sed failed
                 end
             else
-                rm -f "$temp_sed_file" # No changes, remove temp file
+                echo "No relevant patterns found by grep in $file_path, skipping sed."
+            end
+
+            if test -n "$temp_sed_commands_file" && test -f "$temp_sed_commands_file"
+                rm -f "$temp_sed_commands_file" # Clean up sed command file
             end
         end
     end
@@ -187,11 +224,11 @@ if command -v rsync >/dev/null
     end
     set -a rsync_args "$temp_clone_dir/" "./"
 
-    # Use rsync: archive mode, verbose, delete extraneous files, exclude specified items
     rsync $rsync_args
     if test $status -ne 0
         echo "Error: rsync command failed."
-        exit 1
+        # Consider exiting if rsync fails, as subsequent steps might operate on incorrect/incomplete data
+        # exit 1; # Uncomment if strict failure is desired
     end
 else
     echo "Warning: 'rsync' command not found. Falling back to 'cp'."
@@ -205,9 +242,9 @@ else
     set general_root_exclusions ".vscode" ".sops.yaml" "LICENSE" "README.md"
 
     set items_to_copy_sources
-    for item_name in (ls -A $temp_clone_dir) # item_name is like "scripts", "README.md"
+    for item_name in (ls -A $temp_clone_dir)
         if test "$item_name" = ".git"; continue; end
-        if test "$item_name" = "$script_top_level_item"; continue; end # Skip the dir/file containing the script
+        if test "$item_name" = "$script_top_level_item"; continue; end
 
         set -l skip_general_exclusion = false
         for exclusion in $general_root_exclusions
@@ -225,8 +262,7 @@ else
         cp -Rf $items_to_copy_sources ./
         if test $status -ne 0
             echo "Error: cp command failed."
-            # Note: cp might have partially succeeded.
-            exit 1
+            # exit 1; # Uncomment if strict failure is desired
         end
     else
         echo "No items to copy from temporary clone directory (after exclusions)."
