@@ -149,6 +149,41 @@ if command -v rsync >/dev/null
         ".github/CODE_OF_CONDUCT.md" \
         ".vscode/" \
         "talos/nodes/*" \
+        kubernetes/apps/default/atuin/ \
+        kubernetes/apps/default/autobrr/ \
+        kubernetes/apps/default/bazarr/ \
+        kubernetes/apps/default/beets/ \
+        kubernetes/apps/default/cross-seed/ \
+        kubernetes/apps/default/fusion/ \
+        kubernetes/apps/default/go2rtc/ \
+        kubernetes/apps/default/mosquitto/ \
+        kubernetes/apps/default/pinchflat/ \
+        kubernetes/apps/default/plex/ \
+        kubernetes/apps/default/prowlarr/ \
+        kubernetes/apps/default/qbittorrent/ \
+        kubernetes/apps/default/radarr/ \
+        kubernetes/apps/default/recyclarr/ \
+        kubernetes/apps/default/sabnzbd/ \
+        kubernetes/apps/default/slskd/ \
+        kubernetes/apps/default/sonarr/ \
+        kubernetes/apps/default/tautulli/ \
+        kubernetes/apps/default/webhook/ \
+        kubernetes/apps/default/zigbee/ \
+        kubernetes/apps/default/zwave/ \
+        kubernetes/apps/kube-system/csi-driver-nfs/ \
+        kubernetes/apps/kube-system/descheduler/ \
+        kubernetes/apps/kube-system/intel-device-plugin-operator/ \
+        kubernetes/apps/kube-system/metrics-server/ \
+        kubernetes/apps/kube-system/reloader/ \
+        kubernetes/apps/kube-system/snapshot-controller/ \
+        kubernetes/apps/observability/blackbox-exporter/ \
+        kubernetes/apps/observability/gatus/ \
+        kubernetes/apps/observability/kromgo/ \
+        kubernetes/apps/observability/kube-prometheus-stack/ \
+        kubernetes/apps/observability/loki/ \
+        kubernetes/apps/observability/promtail/ \
+        kubernetes/apps/observability/silence-operator/ \
+        kubernetes/apps/observability/unpoller/ \
         ".sops.yaml" \
         LICENSE \
         "README.md"
