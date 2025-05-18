@@ -180,6 +180,7 @@ if command -v rsync >/dev/null
         kubernetes/apps/kube-system/spegel/ \
         kubernetes/apps/kube-system/snapshot-controller/ \
         kubernetes/apps/rook-ceph/ \
+        kubernetes/components/common/sops/ \
         ".sops.yaml" \
         LICENSE \
         "README.md"
