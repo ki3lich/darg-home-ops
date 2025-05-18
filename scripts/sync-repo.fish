@@ -23,8 +23,9 @@ if set -q _flag_help
     echo ""
     echo "Options:"
     echo "  --clean    Remove all files and directories from the repository root"
-    echo "             (except .git, this script, and temporary directories)"
-    echo "             before copying files from the remote repository."
+    echo "             (except .git, this script and its parent directories,"
+    echo "             and temporary directories) before copying files from the"
+    echo "             remote repository."
     echo "  -h, --help Show this help message and exit."
     exit 0
 end
@@ -33,7 +34,7 @@ end
 
 # Function to clean the current repository's working directory
 function clean_current_repo_contents
-    echo "Cleaning current repository contents (excluding .git, this script, and temp dirs)..."
+    echo "Cleaning current repository contents (excluding .git, this script and its parents, and temp dirs)..."
 
     set items_in_cwd (ls -A) # List all items, including hidden
 
@@ -49,8 +50,13 @@ function clean_current_repo_contents
         if test "$item_absolute_path" = "$current_script_absolute_path"
             continue
         end
+        # Skip any parent directory of the script
+        if string starts-with -- "$current_script_absolute_path" "$item_absolute_path/"
+            echo "Skipping $item_path as it contains the running script."
+            continue
+        end
         # Skip the temp clone directory if it's somehow in the CWD
-        if test "$item_absolute_path" = (realpath "$temp_clone_dir")
+        if test -d "$temp_clone_dir" && test "$item_absolute_path" = (realpath "$temp_clone_dir")
             continue
         end
 
@@ -67,7 +73,11 @@ function perform_replacements_in_files
     set -l replacements \
         onedr0p/home-ops ki3lich/darg-home-ops \
         devbu-io darg-win \
-        "debbu\.io" "darg\.win" # Escaped dot for literal matching
+        "debbu\.io" "darg\.win" \
+        "op://kubernetes" "op://darg-home-ops" \
+        "192\.168\.42\.120" "192.168.1.203" \
+        "192\.168\.42\.0" "192.168.1." \
+        "ceph-block" "openebs-hostpath"
 
     set -l files_to_process
     if command -v fd >/dev/null
@@ -97,7 +107,8 @@ function perform_replacements_in_files
         if $is_text_file
             echo "Processing $file_path for replacements..."
             set -l temp_sed_file (mktemp)
-            set -l original_content (cat "$file_path")
+            # Read entire file content as a single string, preserving newlines
+            set -l original_content (cat "$file_path" | string collect)
             set -l current_content $original_content
 
             for i in (seq 1 2 (count $replacements))
@@ -108,7 +119,8 @@ function perform_replacements_in_files
 
             # Only write if content changed to preserve timestamps and avoid unnecessary writes
             if test "$current_content" != "$original_content"
-                echo "$current_content" >"$temp_sed_file"
+                # Use printf to write content, ensuring newlines are handled correctly
+                printf "%s" "$current_content" >"$temp_sed_file"
                 if test $status -eq 0
                     mv "$temp_sed_file" "$file_path"
                 else
@@ -153,11 +165,30 @@ if not git clone --depth 1 "$remote_repo_url" "$temp_clone_dir"
     exit 1
 end
 
+# Determine script path relative to git root for exclusion
+set script_relative_path_to_git_root (realpath --relative-to="$git_root" "$current_script_absolute_path")
+
 # Copy files from the cloned repo to the current directory
 echo "Synchronizing files from $temp_clone_dir to $git_root..."
 if command -v rsync >/dev/null
-    # Use rsync: archive mode, verbose, delete extraneous files, exclude .git from source
-    rsync -a --delete --exclude='.git/' "$temp_clone_dir/" "./"
+    set rsync_excludes_list \
+        "$script_relative_path_to_git_root" \
+        ".github/CODE_OF_CONDUCT.md" \
+        ".vscode/" \
+        "talos/nodes/*" \
+        ".sops.yaml" \
+        "LICENSE" \
+        "README.md"
+
+    set rsync_args
+    set -a rsync_args "-a" "--delete" "--exclude=.git/"
+    for ex_item in $rsync_excludes_list
+        set -a rsync_args "--exclude=$ex_item"
+    end
+    set -a rsync_args "$temp_clone_dir/" "./"
+
+    # Use rsync: archive mode, verbose, delete extraneous files, exclude specified items
+    rsync $rsync_args
     if test $status -ne 0
         echo "Error: rsync command failed."
         exit 1
@@ -165,27 +196,40 @@ if command -v rsync >/dev/null
 else
     echo "Warning: 'rsync' command not found. Falling back to 'cp'."
     echo "This fallback will copy files but will NOT delete files from the destination"
-    echo "that are not present in the source. For a clean sync, please install rsync."
-    # Fallback to cp: copy recursively, force overwrite.
-    # This won't handle deletions or all metadata like rsync.
-    # Create a list of items to copy, excluding .git
-    set items_to_copy
-    for item in (ls -A $temp_clone_dir)
-        if test "$item" != ".git"
-            set -a items_to_copy "$item"
+    echo "that are not present in the source, and file exclusion capabilities are limited."
+    echo "Only some top-level files/directories specified for exclusion might be skipped."
+    echo "Nested exclusions (e.g. '.github/CODE_OF_CONDUCT.md', 'talos/nodes/*') will not be applied."
+    echo "For a clean and precise sync, please install rsync."
+
+    set script_top_level_item (string split -m1 / $script_relative_path_to_git_root)[1]
+    set general_root_exclusions ".vscode" ".sops.yaml" "LICENSE" "README.md"
+
+    set items_to_copy_sources
+    for item_name in (ls -A $temp_clone_dir) # item_name is like "scripts", "README.md"
+        if test "$item_name" = ".git"; continue; end
+        if test "$item_name" = "$script_top_level_item"; continue; end # Skip the dir/file containing the script
+
+        set -l skip_general_exclusion = false
+        for exclusion in $general_root_exclusions
+            if test "$item_name" = "$exclusion"
+                set skip_general_exclusion true
+                break
+            end
         end
+        if $skip_general_exclusion; continue; end
+
+        set -a items_to_copy_sources "$temp_clone_dir/$item_name"
     end
-    if test (count $items_to_copy) -gt 0
-        # Prepare paths for cp
-        set cp_source_paths (for item in $items_to_copy; echo "$temp_clone_dir/$item"; end)
-        cp -Rf $cp_source_paths ./
+
+    if test (count $items_to_copy_sources) -gt 0
+        cp -Rf $items_to_copy_sources ./
         if test $status -ne 0
             echo "Error: cp command failed."
             # Note: cp might have partially succeeded.
             exit 1
         end
     else
-        echo "No items to copy from temporary clone directory."
+        echo "No items to copy from temporary clone directory (after exclusions)."
     end
 end
 
