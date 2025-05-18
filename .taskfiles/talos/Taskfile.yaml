@@ -7,6 +7,7 @@ tasks:
     desc: Get talos config
     cmds:
       - op read op://darg-home-ops/talos/secrets.yaml | talosctl gen config main https://192.168.1.203:6443 -t talosconfig --force --with-secrets /dev/stdin
+      # TODO: generate endpoint list
       - yq eval '.contexts.main.endpoints += ["192.168.1.203"]' -i talosconfig
     preconditions:
       - op signin
@@ -18,7 +19,8 @@ tasks:
         | talosctl --nodes {{.IP}} apply-config --mode {{.MODE}} {{.EXTRA_ARGS}} --file /dev/stdin
     vars:
       MODE: '{{.MODE | default "auto"}}'
-      #rpc error: code = Unavailable desc = connection error: desc = "transport: authentication handshake failed: tls: failed to verify certificate: x509: certificate signed by unknown authority"
+      # TODO:
+      # rpc error: code = Unavailable desc = connection error: desc = "transport: authentication handshake failed: tls: failed to verify certificate: x509: certificate signed by unknown authority"
       MACHINE_TYPE: controlplane
       EXTRA_ARGS: '{{.EXTRA_ARGS | default ""}}'
     requires:
