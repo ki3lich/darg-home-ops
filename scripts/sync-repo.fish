@@ -76,7 +76,7 @@ end
 
 # Function to perform replacements in files
 function perform_replacements_in_files
-    set files_to_modify (find . -type f)
+    set files_to_modify (find . -path ./.git -prune -o -type f -print)
 
     set -l original_locale $LANG
     set LANG C
