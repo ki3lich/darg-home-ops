@@ -137,7 +137,6 @@ function perform_replacements_in_files
                     set escaped_new (escape_sed_replacement_chars "$new_pattern" "$sed_delimiter")
                     # Append sed command to the temporary command file
                     echo "s$sed_delimiter$escaped_old$sed_delimiter$escaped_new$sed_delimiter""g" >> "$temp_sed_commands_file"
-                end
             end
 
             if $needs_sed_run
@@ -215,11 +214,11 @@ if command -v rsync >/dev/null
         ".vscode/" \
         "talos/nodes/*" \
         ".sops.yaml" \
-        "LICENSE" \
+        LICENSE \
         "README.md"
 
     set rsync_args
-    set -a rsync_args "-a" "--delete" "--exclude=.git/"
+    set -a rsync_args -a --delete "--exclude=.git/"
     for ex_item in $rsync_excludes_list
         set -a rsync_args "--exclude=$ex_item"
     end
@@ -240,12 +239,16 @@ else
     echo "For a clean and precise sync, please install rsync."
 
     set script_top_level_item (string split -m1 / $script_relative_path_to_git_root)[1]
-    set general_root_exclusions ".vscode" ".sops.yaml" "LICENSE" "README.md"
+    set general_root_exclusions ".vscode" ".sops.yaml" LICENSE "README.md"
 
     set items_to_copy_sources
     for item_name in (ls -A $temp_clone_dir)
-        if test "$item_name" = ".git"; continue; end
-        if test "$item_name" = "$script_top_level_item"; continue; end
+        if test "$item_name" = ".git"
+            continue
+        end
+        if test "$item_name" = "$script_top_level_item"
+            continue
+        end
 
         set -l skip_general_exclusion = false
         for exclusion in $general_root_exclusions
@@ -254,7 +257,9 @@ else
                 break
             end
         end
-        if $skip_general_exclusion; continue; end
+        if $skip_general_exclusion
+            continue
+        end
 
         set -a items_to_copy_sources "$temp_clone_dir/$item_name"
     end
