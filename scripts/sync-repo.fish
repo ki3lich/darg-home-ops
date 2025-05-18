@@ -101,7 +101,9 @@ function perform_replacements_in_files
             sed -i '' -e 's/onedr0p\/home-ops/ki3lich\/darg-home-ops/g' \
                 -e s/onedr0p/ki3lich/g \
                 -e s/devbu-io/darg-win/g \
+                -e 's/copyMethod:\ Snapshot/copyMethod:\ Direct/g' \
                 -e 's/devbu\.io/darg\.win/g' \
+                -e s/VOLSYNC_CACHE_SNAPSHOTCLASS/VOLSYNC_CACHE_STORAGECLASS//g \
                 -e 's/op:\/\/kubernetes/op:\/\/darg-home-ops/g' \
                 -e 's/192\.168\.42\.120/192.168.1.203/g' \
                 -e 's/192\.168\.42\.0/192.168.1./g' \
