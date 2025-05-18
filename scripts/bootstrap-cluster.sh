@@ -6,6 +6,9 @@ source "$(dirname "${0}")/lib/common.sh"
 export LOG_LEVEL="debug"
 export ROOT_DIR="$(git rev-parse --show-toplevel)"
 
+export KUBECONFIG=$ROOT_DIR/kubeconfig
+export TALOSCONFIG=$ROOT_DIR/talosconfig
+
 # Apply the Talos configuration to all the nodes
 function apply_talos_config() {
     log debug "Applying Talos configuration"
@@ -21,9 +24,11 @@ function apply_talos_config() {
         log warn "No Talos machine files found for worker" "file=${worker_file}"
     fi
 
-    if ! nodes=$(talosctl config info --output json 2>/dev/null | jq --exit-status --raw-output '.nodes | join(" ")') || [[ -z "${nodes}" ]]; then
-        log error "No Talos nodes found"
-    fi
+    # TODO: replace that with dynamic nodes generated from files from talos/nodes/
+    nodes=192.168.1.203
+    # if ! nodes=$(talosctl config info --output json 2>/dev/null | jq --exit-status --raw-output '.nodes | join(" ")') || [[ -z "${nodes}" ]]; then
+    #     log error "No Talos nodes found"
+    # fi
 
     # Check that all nodes have a Talos configuration file
     for node in ${nodes}; do
@@ -117,7 +122,7 @@ function apply_crds() {
 
     local -r crds=(
         # renovate: datasource=github-releases depName=kubernetes-sigs/external-dns
-        https://raw.githubusercontent.com/kubernetes-sigs/external-dns/refs/tags/v0.17.0/docs/sources/crd/crd-manifest.yaml
+        https://raw.githubusercontent.com/kubernetes-sigs/external-dns/refs/tags/v0.17.0/charts/external-dns/crds/dnsendpoint.yaml
         # renovate: datasource=github-releases depName=kubernetes-sigs/gateway-api
         https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.3.0/experimental-install.yaml
         # renovate: datasource=github-releases depName=prometheus-operator/prometheus-operator
