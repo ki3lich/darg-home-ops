@@ -130,45 +130,42 @@ function perform_replacements_in_files
                 # Check if the pattern (as a regex for grep) exists in the file
                 if grep -q -- "$old_pattern" "$file_path"
                     if not $needs_sed_run # Create temp file only if we haven't already for this file_path
-                        set temp_sed_commands_file (mktemp)
-                    end
-                    set needs_sed_run true
-                    set escaped_old (escape_sed_pattern_delimiter "$old_pattern" "$sed_delimiter")
-                    set escaped_new (escape_sed_replacement_chars "$new_pattern" "$sed_delimiter")
-                    # Append sed command to the temporary command file
-                    echo "s$sed_delimiter$escaped_old$sed_delimiter$escaped_new$sed_delimiter""g" >> "$temp_sed_commands_file"
-            end
-
-            if $needs_sed_run
-                echo "Applying sed commands to $file_path"
-                set temp_output_file (mktemp)
-                if sed -f "$temp_sed_commands_file" "$file_path" > "$temp_output_file"
-                    # Compare original with sed output; update only if different
-                    if not cmp -s "$file_path" "$temp_output_file"
-                        echo "Content changed, updating $file_path"
-                        if mv "$temp_output_file" "$file_path"
-                            # Successfully moved temp_output_file to file_path
-                        else
-                            echo "Error: Failed to move temp output file to $file_path."
-                            rm -f "$temp_output_file" # Clean up temp output if mv failed
-                        end
-                    else
-                        echo "Content unchanged by sed for $file_path, skipping update."
-                        rm -f "$temp_output_file" # Clean up temp output, no changes needed
-                    end
-                else
-                    echo "Error: sed command failed for $file_path."
-                    rm -f "$temp_output_file" # Clean up temp output if sed failed
-                end
-            else
-                echo "No relevant patterns found by grep in $file_path, skipping sed."
-            end
-
-            if test -n "$temp_sed_commands_file" && test -f "$temp_sed_commands_file"
-                rm -f "$temp_sed_commands_file" # Clean up sed command file
-            end
-        end
+        set temp_sed_commands_file (mktemp)
     end
+    set needs_sed_run true
+    set escaped_old (escape_sed_pattern_delimiter "$old_pattern" "$sed_delimiter")
+    set escaped_new (escape_sed_replacement_chars "$new_pattern" "$sed_delimiter")
+    # Append sed command to the temporary command file
+    echo "s$sed_delimiter$escaped_old$sed_delimiter$escaped_new$sed_delimiter""g" >>"$temp_sed_commands_file"
+end
+
+if $needs_sed_run
+    echo "Applying sed commands to $file_path"
+    set temp_output_file (mktemp)
+    if sed -f "$temp_sed_commands_file" "$file_path" >"$temp_output_file"
+        # Compare original with sed output; update only if different
+        if not cmp -s "$file_path" "$temp_output_file"
+            echo "Content changed, updating $file_path"
+            if mv "$temp_output_file" "$file_path"
+                # Successfully moved temp_output_file to file_path
+            else
+                echo "Error: Failed to move temp output file to $file_path."
+                rm -f "$temp_output_file" # Clean up temp output if mv failed
+            end
+        else
+            echo "Content unchanged by sed for $file_path, skipping update."
+            rm -f "$temp_output_file" # Clean up temp output, no changes needed
+        end
+    else
+        echo "Error: sed command failed for $file_path."
+        rm -f "$temp_output_file" # Clean up temp output if sed failed
+    end
+else
+    echo "No relevant patterns found by grep in $file_path, skipping sed."
+end
+
+if test -n "$temp_sed_commands_file" && test -f "$temp_sed_commands_file"
+    rm -f "$temp_sed_commands_file" # Clean up sed command file
 end
 
 # Function to handle cleanup on exit
