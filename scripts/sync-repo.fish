@@ -184,6 +184,13 @@ if command -v rsync >/dev/null
         kubernetes/apps/kube-system/spegel/ \
         kubernetes/apps/kube-system/snapshot-controller/ \
         kubernetes/apps/rook-ceph/ \
+        kubernetes/apps/observability/blackbox-exporter/ \
+        kubernetes/apps/observability/grafana/ \
+        kubernetes/apps/observability/loki/ \
+        kubernetes/apps/observability/promtail/ \
+        kubernetes/apps/observability/silence-operator/ \
+        kubernetes/apps/observability/smartctl-exporter/ \
+        kubernetes/apps/observability/snmp-exporter/ \
         kubernetes/components/common/sops/ \
         ".sops.yaml" \
         LICENSE \
