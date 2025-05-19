@@ -6,5 +6,5 @@ namespace: default
 components:
   - ../../components/common
 resources:
-  # - ./home-assistant/ks.yaml
+  - ./home-assistant/ks.yaml
   - ./mosquitto/ks.yaml
