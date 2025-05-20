@@ -25,8 +25,8 @@ if set -q _flag_help
     echo "Options:"
     echo "  --clean    Remove all files and directories from the repository root"
     echo "             (except .git, this script and its parent directories,"
-    echo "             and temporary directories) before copying files from the"
-    echo "             remote repository."
+    echo "             kubeconfig, talosconfig, and temporary directories) before"
+    echo "             copying files from the remote repository."
     echo "  -h, --help Show this help message and exit."
     exit 0
 end
@@ -35,7 +35,7 @@ end
 
 # Function to clean the current repository's working directory
 function clean_current_repo_contents
-    echo "Cleaning current repository contents (excluding .git, this script and its parents, and temp dirs)..."
+    echo "Cleaning current repository contents (excluding .git, kubeconfig, talosconfig, this script and its parents, and temp dirs)..."
 
     set items_in_cwd (ls -A) # List all items, including hidden
 
@@ -45,6 +45,14 @@ function clean_current_repo_contents
 
         # Skip .git directory
         if test "$item" = ".git"
+            continue
+        end
+        # Skip kubeconfig file
+        if test "$item" = "kubeconfig"
+            continue
+        end
+        # Skip talosconfig file
+        if test "$item" = "talosconfig"
             continue
         end
         # Skip the script itself
@@ -157,6 +165,8 @@ if command -v rsync >/dev/null
         ".github/CODE_OF_CONDUCT.md" \
         ".vscode/" \
         "talos/nodes/*" \
+        "kubeconfig" \
+        "talosconfig" \
         kubernetes/apps/default/atuin/ \
         kubernetes/apps/default/autobrr/ \
         kubernetes/apps/default/bazarr/ \
@@ -218,7 +228,7 @@ else
     echo "For a clean and precise sync, please install rsync."
 
     set script_top_level_item (string split -m1 / $script_relative_path_to_git_root)[1]
-    set general_root_exclusions ".vscode" ".sops.yaml" LICENSE "README.md"
+    set general_root_exclusions ".vscode" ".sops.yaml" LICENSE "README.md" "kubeconfig" "talosconfig"
 
     set items_to_copy_sources
     for item_name in (ls -A $temp_clone_dir)
