@@ -33,7 +33,7 @@ tasks:
 
   upgrade-node:
     desc: Upgrade Talos on a single node [IP=required] [MODE=powercycle]
-    cmd: talosctl --nodes {{.IP}} upgrade --image="{{.FACTORY_IMAGE}}" --reboot-mode={{.MODE}} --timeout=10m
+    cmd: talosctl --nodes {{.IP}} upgrade --preserve=true --image="{{.FACTORY_IMAGE}}" --reboot-mode={{.MODE}} --timeout=10m
     vars:
       MODE: '{{.MODE | default "powercycle"}}'
       FACTORY_IMAGE:
