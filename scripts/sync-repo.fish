@@ -48,11 +48,11 @@ function clean_current_repo_contents
             continue
         end
         # Skip kubeconfig file
-        if test "$item" = "kubeconfig"
+        if test "$item" = kubeconfig
             continue
         end
         # Skip talosconfig file
-        if test "$item" = "talosconfig"
+        if test "$item" = talosconfig
             continue
         end
         # Skip the script itself
@@ -164,9 +164,10 @@ if command -v rsync >/dev/null
         "$script_relative_path_to_git_root" \
         ".github/CODE_OF_CONDUCT.md" \
         ".vscode/" \
+        ".pre-commit-config.yaml" \
         "talos/nodes/*" \
-        "kubeconfig" \
-        "talosconfig" \
+        kubeconfig \
+        talosconfig \
         kubernetes/apps/default/atuin/ \
         kubernetes/apps/default/autobrr/ \
         kubernetes/apps/default/bazarr/ \
@@ -175,6 +176,7 @@ if command -v rsync >/dev/null
         kubernetes/apps/default/fusion/ \
         kubernetes/apps/default/go2rtc/ \
         kubernetes/apps/default/jellyseerr/ \
+        kubernetes/apps/default/jellyfin/ \
         kubernetes/apps/default/pinchflat/ \
         kubernetes/apps/default/plex/ \
         kubernetes/apps/default/prowlarr/ \
@@ -188,12 +190,12 @@ if command -v rsync >/dev/null
         kubernetes/apps/default/webhook/ \
         kubernetes/apps/default/zigbee/ \
         kubernetes/apps/default/zwave/ \
+        kubernetes/apps/external-secrets/onepassword-connect/ \
         kubernetes/apps/kube-system/csi-driver-nfs/ \
         kubernetes/apps/kube-system/descheduler/ \
         kubernetes/apps/kube-system/intel-device-plugin-operator/ \
-        kubernetes/apps/kube-system/spegel/ \
         kubernetes/apps/kube-system/snapshot-controller/ \
-        kubernetes/apps/rook-ceph/ \
+        kubernetes/apps/kube-system/spegel/ \
         kubernetes/apps/observability/blackbox-exporter/ \
         kubernetes/apps/observability/grafana/ \
         kubernetes/apps/observability/loki/ \
@@ -201,6 +203,7 @@ if command -v rsync >/dev/null
         kubernetes/apps/observability/silence-operator/ \
         kubernetes/apps/observability/smartctl-exporter/ \
         kubernetes/apps/observability/snmp-exporter/ \
+        kubernetes/apps/rook-ceph/ \
         kubernetes/components/common/sops/ \
         ".sops.yaml" \
         LICENSE \
@@ -228,7 +231,7 @@ else
     echo "For a clean and precise sync, please install rsync."
 
     set script_top_level_item (string split -m1 / $script_relative_path_to_git_root)[1]
-    set general_root_exclusions ".vscode" ".sops.yaml" LICENSE "README.md" "kubeconfig" "talosconfig"
+    set general_root_exclusions ".vscode" ".sops.yaml" LICENSE "README.md" kubeconfig talosconfig
 
     set items_to_copy_sources
     for item_name in (ls -A $temp_clone_dir)
