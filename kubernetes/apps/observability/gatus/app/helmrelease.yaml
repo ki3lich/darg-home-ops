@@ -71,8 +71,6 @@ spec:
                 cpu: 100m
               limits:
                 memory: 256Mi
-        serviceAccount:
-          identifier: gatus
     defaultPodOptions:
       securityContext:
         runAsNonRoot: true
@@ -82,13 +80,11 @@ spec:
         fsGroupChangePolicy: OnRootMismatch
     service:
       app:
-        controller: gatus
         ports:
           http:
             port: *port
     serviceMonitor:
       app:
-        serviceName: gatus
         endpoints:
           - port: http
     route:
@@ -100,21 +96,17 @@ spec:
           - name: external
             namespace: kube-system
             sectionName: https
-        rules:
-          - backendRefs:
-              - identifier: app
-                port: *port
     rbac:
       roles:
         gatus:
-          type: Role
+          type: ClusterRole
           rules:
             - apiGroups: [""]
               resources: ["configmaps", "secrets"]
               verbs: ["get", "watch", "list"]
       bindings:
         gatus:
-          type: RoleBinding
+          type: ClusterRoleBinding
           roleRef:
             identifier: gatus
           subjects:
