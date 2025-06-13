@@ -163,6 +163,7 @@ if command -v rsync >/dev/null
     set rsync_excludes_list \
         "$script_relative_path_to_git_root" \
         ".github/CODE_OF_CONDUCT.md" \
+        ".github/workflows/schemas.yaml" \
         ".vscode/" \
         ".pre-commit-config.yaml" \
         "talos/nodes/*" \
@@ -175,8 +176,8 @@ if command -v rsync >/dev/null
         kubernetes/apps/default/cross-seed/ \
         kubernetes/apps/default/fusion/ \
         kubernetes/apps/default/go2rtc/ \
-        kubernetes/apps/default/jellyseerr/ \
         kubernetes/apps/default/jellyfin/ \
+        kubernetes/apps/default/jellyseerr/ \
         kubernetes/apps/default/pinchflat/ \
         kubernetes/apps/default/plex/ \
         kubernetes/apps/default/prowlarr/ \
@@ -187,9 +188,12 @@ if command -v rsync >/dev/null
         kubernetes/apps/default/slskd/ \
         kubernetes/apps/default/sonarr/ \
         kubernetes/apps/default/tautulli/ \
+        kubernetes/apps/default/thelounge/ \
         kubernetes/apps/default/webhook/ \
         kubernetes/apps/default/zigbee/ \
         kubernetes/apps/default/zwave/ \
+        kubernetes/apps/external-secrets/external-secrets/app/clustersecretstore.yaml \
+        kubernetes/apps/external-secrets/kustomization.yaml \
         kubernetes/apps/external-secrets/onepassword-connect/ \
         kubernetes/apps/kube-system/csi-driver-nfs/ \
         kubernetes/apps/kube-system/descheduler/ \
@@ -198,12 +202,16 @@ if command -v rsync >/dev/null
         kubernetes/apps/kube-system/spegel/ \
         kubernetes/apps/observability/blackbox-exporter/ \
         kubernetes/apps/observability/grafana/ \
+        kubernetes/apps/observability/keda/ \
+        kubernetes/apps/observability/kromgo/ \
         kubernetes/apps/observability/loki/ \
         kubernetes/apps/observability/promtail/ \
         kubernetes/apps/observability/silence-operator/ \
         kubernetes/apps/observability/smartctl-exporter/ \
         kubernetes/apps/observability/snmp-exporter/ \
+        kubernetes/apps/observability/unpoller/ \
         kubernetes/apps/rook-ceph/ \
+        kubernetes/components/keda/ \
         kubernetes/components/common/sops/ \
         ".sops.yaml" \
         LICENSE \
