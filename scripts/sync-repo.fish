@@ -178,6 +178,7 @@ if command -v rsync >/dev/null
         kubernetes/apps/default/go2rtc/ \
         kubernetes/apps/default/jellyfin/ \
         kubernetes/apps/default/jellyseerr/ \
+        kubernetes/apps/default/maintainerr/ \
         kubernetes/apps/default/pinchflat/ \
         kubernetes/apps/default/plex/ \
         kubernetes/apps/default/prowlarr/ \
