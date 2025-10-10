@@ -109,10 +109,12 @@ function perform_replacements_in_files
             sed -i '' -e 's/onedr0p\/home-ops/ki3lich\/darg-home-ops/g' \
                 -e s/onedr0p/ki3lich/g \
                 -e s/devbu-io/darg-win/g \
+                -e s/turbo-ac/darg-win/g \
                 -e 's/copyMethod:\ Snapshot/copyMethod:\ Direct/g' \
                 -e 's/=Snapshot/=Direct/g' \
                 -e 's/volumeSnapshotClassName:/#\ volumeSnapshotClassName:/g' \
                 -e 's/devbu\.io/darg\.win/g' \
+                -e 's/turbo\.ac/darg\.win/g' \
                 -e s/rook-ceph-cluster/openebs/g \
                 -e s/rook-ceph/openebs-system/g \
                 -e s/VOLSYNC_CACHE_SNAPSHOTCLASS/VOLSYNC_CACHE_STORAGECLASS/g \
