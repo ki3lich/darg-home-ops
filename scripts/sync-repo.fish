@@ -195,9 +195,6 @@ if command -v rsync >/dev/null
         kubernetes/apps/default/webhook/ \
         kubernetes/apps/default/zigbee/ \
         kubernetes/apps/default/zwave/ \
-        kubernetes/apps/external-secrets/external-secrets/app/clustersecretstore.yaml \
-        kubernetes/apps/external-secrets/kustomization.yaml \
-        kubernetes/apps/external-secrets/onepassword-connect/ \
         kubernetes/apps/kube-system/csi-driver-nfs/ \
         kubernetes/apps/kube-system/descheduler/ \
         kubernetes/apps/kube-system/intel-device-plugin-operator/ \
