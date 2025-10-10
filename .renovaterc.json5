@@ -5,10 +5,12 @@
     "docker:enableMajor",
     "helpers:pinGitHubActionDigests",
     "github>ki3lich/darg-home-ops//.renovate/autoMerge.json5",
+    "github>ki3lich/darg-home-ops//.renovate/changelogs.json5",
     "github>ki3lich/darg-home-ops//.renovate/customManagers.json5",
     "github>ki3lich/darg-home-ops//.renovate/grafanaDashboards.json5",
     "github>ki3lich/darg-home-ops//.renovate/groups.json5",
     "github>ki3lich/darg-home-ops//.renovate/labels.json5",
+    "github>ki3lich/darg-home-ops//.renovate/overrides.json5",
     "github>ki3lich/darg-home-ops//.renovate/semanticCommits.json5",
     ":automergeBranch",
     ":disableRateLimiting",
@@ -22,15 +24,16 @@
     "prIgnoreNotification",
   ],
   ignorePaths: [
+    "**/*.sops.*",
     "**/resources/**",
   ],
   flux: {
-    managerFilePatterns: ["/(^|/)kubernetes/.+\\.ya?ml$/"]
+    managerFilePatterns: ["/\\.yaml(?:\\.j2)?$/"],
   },
   "helm-values": {
-    managerFilePatterns: ["/(^|/)kubernetes/.+\\.ya?ml$/"]
+    managerFilePatterns: ["/\\.yaml(?:\\.j2)?$/"],
   },
   kubernetes: {
-    managerFilePatterns: ["/(^|/)kubernetes/.+\\.ya?ml$/"]
+    managerFilePatterns: ["/\\.yaml(?:\\.j2)?$/"],
   },
 }
