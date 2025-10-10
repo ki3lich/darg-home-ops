@@ -1,25 +1,26 @@
 ---
-web:
-  port: ${WEB_PORT}
-storage:
-  type: sqlite
-  path: /config/sqlite.db
-  caching: true
-metrics: true
-debug: false
-ui:
-  title: Status | Gatus
-  header: Status
 connectivity:
   checker:
     target: 1.1.1.1:53
     interval: 1m
-endpoints:
-  - name: flux-webhook
-    group: external
-    url: https://flux-webhook.darg.win
-    interval: 1m
-    client:
-      dns-resolver: tcp://1.1.1.1:53
-    conditions:
-      - "[STATUS] == 404"
+
+metrics: true
+
+storage:
+  type: sqlite
+  caching: true
+  path: ${GATUS_CONFIG_PATH}/gatus.db
+
+ui:
+  title: Status | Gatus
+  header: Status
+  logo: https://avatars.githubusercontent.com/u/213795
+  link: https://github.com/ki3lich
+  buttons:
+    - name: Github
+      link: https://github.com/ki3lich
+    - name: Homelab
+      link: https://github.com/ki3lich/darg-home-ops
+
+web:
+  port: ${GATUS_WEB_PORT}
