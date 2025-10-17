@@ -39,7 +39,7 @@ render-config node:
 [doc('Reset a node')]
 reset-node node:
     gum confirm "Reset node {{ node }}?" --default="No" && \
-        talosctl -n "{{ node }}" reset --graceful=false || exit 0
+        talosctl -n "{{ node }}" reset --graceful=false --reboot || exit 0
 
 [doc('Shutdown a node')]
 shutdown-node node:
