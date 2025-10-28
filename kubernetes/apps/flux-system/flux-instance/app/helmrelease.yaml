@@ -85,6 +85,14 @@ spec:
             target:
               kind: Deployment
               name: source-controller
+          - # Cache Secrets and ConfigMaps
+            patch: |-
+              - op: add
+                path: /spec/template/spec/containers/0/args/-
+                value: --feature-gates=CacheSecretsAndConfigMaps=true
+            target:
+              kind: Deployment
+              name: source-controller
           - # Flux near OOM detection for Helm
             patch: |-
               - op: add
@@ -107,6 +115,14 @@ spec:
             target:
               kind: Deployment
               name: helm-controller
+          # - # Controller-level SOPS decryption  # darg-ops-change
+          #   patch: |-  # darg-ops-change
+          #     - op: add  # darg-ops-change
+          #       path: /spec/template/spec/containers/0/args/-  # darg-ops-change
+          #       value: --sops-age-secret=sops-age-secret  # darg-ops-change
+          #   target:  # darg-ops-change
+          #     kind: Deployment  # darg-ops-change
+          #     name: kustomize-controller  # darg-ops-change
           - # Watch configmaps and secrets attached to HelmReleases and Kustomizations
             patch: |-
               - op: add

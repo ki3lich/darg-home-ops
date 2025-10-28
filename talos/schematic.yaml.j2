@@ -5,8 +5,20 @@ customization:
     - -init_on_free # Less security, faster puter
     - -selinux # Less security, faster puter
     - apparmor=0 # Less security, faster puter
+    #- i915.enable_guc=3 # Meteor Lake CPU & Intel iGPU  # darg-ops-change
     - init_on_alloc=0 # Less security, faster puter
     - init_on_free=0 # Less security, faster puter
+    #- intel_iommu=on # PCI Passthrough  # darg-ops-change
+    #- iommu=pt # PCI Passthrough # darg-ops-change
     - mitigations=off # Less security, faster puter
+    #- module_blacklist=igc # Disable onboard NIC # darg-ops-change
     - security=none # Less security, faster puter
+    #- sysctl.kernel.kexec_load_disabled=1 # Meteor Lake CPU & Intel iGPU # darg-ops-change
     - talos.auditd.disabled=1 # Less security, faster puter
+  #systemExtensions: # darg-ops-change
+  #  officialExtensions: # darg-ops-change
+  #    - siderolabs/i915 # Intel iGPU # darg-ops-change
+  #    - siderolabs/intel-ucode # Intel iGPU # darg-ops-change
+  #    - siderolabs/mei # Intel iGPU # darg-ops-change
+  #    - siderolabs/nfsrahead # NFS Performance # darg-ops-change
+  #    - siderolabs/thunderbolt # Thunderbolt NICs # darg-ops-change

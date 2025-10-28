@@ -1,0 +1,11 @@
+# ---  # darg-ops-change
+# apiVersion: policy/v1  # darg-ops-change
+# kind: PodDisruptionBudget  # darg-ops-change
+# metadata:  # darg-ops-change
+#   name: external-secrets-webhook  # darg-ops-change
+# spec:  # darg-ops-change
+#   minAvailable: 1  # darg-ops-change
+#   selector:  # darg-ops-change
+#     matchLabels:  # darg-ops-change
+#       app.kubernetes.io/instance: external-secrets  # darg-ops-change
+#       app.kubernetes.io/name: external-secrets-webhook  # darg-ops-change

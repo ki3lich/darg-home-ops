@@ -14,7 +14,7 @@ spec:
       envoyDeployment:
         replicas: 2
         container:
-          image: mirror.gcr.io/envoyproxy/envoy:v1.35.3
+          image: mirror.gcr.io/envoyproxy/envoy:v1.36.2
           resources:
             requests:
               cpu: 100m
@@ -59,7 +59,7 @@ spec:
   infrastructure:
     annotations:
       external-dns.alpha.kubernetes.io/hostname: *hostname
-      lbipam.cilium.io/ips: 192.168.1.126
+      lbipam.cilium.io/ips: 192.168.1.186 # darg-ops-change
   listeners:
     - name: http
       protocol: HTTP
@@ -96,7 +96,7 @@ spec:
   infrastructure:
     annotations:
       external-dns.alpha.kubernetes.io/hostname: *hostname
-      lbipam.cilium.io/ips: 192.168.1.121
+      lbipam.cilium.io/ips: 192.168.19.181 # darg-ops-change
   listeners:
     - name: http
       protocol: HTTP

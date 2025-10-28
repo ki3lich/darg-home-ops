@@ -8,5 +8,6 @@ components:
   - ../../components/alerts
 
 resources:
+  - ./namespace.yaml
   - ./home-assistant/ks.yaml
   - ./mosquitto/ks.yaml

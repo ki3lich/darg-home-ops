@@ -181,26 +181,34 @@ if command -v rsync >/dev/null
         kubernetes/apps/default/jellyfin/ \
         kubernetes/apps/default/jellyseerr/ \
         kubernetes/apps/default/maintainerr/ \
+        kubernetes/apps/default/notifier/ \
+        kubernetes/apps/default/nzbget/ \
         kubernetes/apps/default/pinchflat/ \
         kubernetes/apps/default/plex/ \
         kubernetes/apps/default/prowlarr/ \
         kubernetes/apps/default/qbittorrent/ \
+        kubernetes/apps/default/qui/ \
         kubernetes/apps/default/radarr/ \
         kubernetes/apps/default/recyclarr/ \
         kubernetes/apps/default/sabnzbd/ \
         kubernetes/apps/default/slskd/ \
+        kubernetes/apps/default/smtp-relay/ \
         kubernetes/apps/default/sonarr/ \
         kubernetes/apps/default/tautulli/ \
         kubernetes/apps/default/thelounge/ \
+        kubernetes/apps/default/tqm/ \
         kubernetes/apps/default/webhook/ \
         kubernetes/apps/default/zigbee/ \
         kubernetes/apps/default/zwave/ \
         kubernetes/apps/kube-system/csi-driver-nfs/ \
         kubernetes/apps/kube-system/descheduler/ \
         kubernetes/apps/kube-system/intel-device-plugin-operator/ \
+        kubernetes/apps/kube-system/intel-gpu-resource-driver/ \
+        kubernetes/apps/kube-system/multus/ \
         kubernetes/apps/kube-system/snapshot-controller/ \
         kubernetes/apps/kube-system/spegel/ \
         kubernetes/apps/observability/blackbox-exporter/ \
+        kubernetes/apps/observability/fluent-bit/ \
         kubernetes/apps/observability/grafana/ \
         kubernetes/apps/observability/keda/ \
         kubernetes/apps/observability/kromgo/ \
@@ -210,9 +218,10 @@ if command -v rsync >/dev/null
         kubernetes/apps/observability/smartctl-exporter/ \
         kubernetes/apps/observability/snmp-exporter/ \
         kubernetes/apps/observability/unpoller/ \
+        kubernetes/apps/observability/victoria-logs/ \
         kubernetes/apps/rook-ceph/ \
-        kubernetes/components/keda/ \
         kubernetes/components/common/sops/ \
+        kubernetes/components/keda/ \
         ".sops.yaml" \
         LICENSE \
         "README.md"
@@ -277,6 +286,9 @@ end
 
 # Perform replacements
 perform_replacements_in_files
+
+pre-commit run --all-files
+find ./kubernetes/apps -type d -empty -delete
 
 echo ""
 echo "Synchronization and replacement process complete."

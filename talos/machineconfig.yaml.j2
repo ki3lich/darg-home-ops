@@ -1,6 +1,6 @@
 ---
 version: v1alpha1
-persist: true
+persist: true # darg-ops-change
 machine:
   ca:
     crt: op://darg-home-ops/talos/MACHINE_CA_CRT
@@ -37,10 +37,25 @@ machine:
         [plugins."io.containerd.cri.v1.runtime"]
           cdi_spec_dirs = ["/var/cdi/static", "/var/cdi/dynamic"]
           device_ownership_from_security_context = true
+    #- op: overwrite   # darg-ops-change
+    #  path: /etc/nfsmount.conf  # darg-ops-change
+    #  permissions: 0o644  # darg-ops-change
+    #  content: |  # darg-ops-change
+    #    [ NFSMount_Global_Options ]  # darg-ops-change
+    #    nfsvers=4.2  # darg-ops-change
+    #    hard=True  # darg-ops-change
+    #    nconnect=16  # darg-ops-change
+    #    noatime=True  # darg-ops-change
   install:
-    disk: /dev/sda
-    image: factory.talos.dev/metal-installer/05b4a47a70bc97786ed83d200567dcc8a13f731b164537ba59d5397d668851fa:v1.11.2
+    diskSelector:
+      model: SanDisk SD8SN8U-  # darg-ops-change
+    image: factory.talos.dev/metal-installer/05b4a47a70bc97786ed83d200567dcc8a13f731b164537ba59d5397d668851fa:v1.11.3
     wipe: false
+  #kernel:  # darg-ops-change
+  #  modules:  # darg-ops-change
+  #    - name: nbd  # darg-ops-change
+  #    - name: thunderbolt  # darg-ops-change
+  #    - name: thunderbolt_net  # darg-ops-change
   kubelet:
     defaultRuntimeSeccompProfileEnabled: true
     disableManifestsDirectory: true
@@ -53,7 +68,17 @@ machine:
     nodeIP:
       validSubnets:
         - 192.168.1.0/24
+  network:
+    interfaces:  # darg-ops-change
+      - deviceSelector:  # darg-ops-change
+          hardwareAddr: b0:7b:25:40:41:c6  # darg-ops-change
+          driver: r8169  # darg-ops-change
+        mtu: 9000  # darg-ops-change
+        dhcp: true  # darg-ops-change
+        vip:  # darg-ops-change
+          ip: 192.168.1.120  # darg-ops-change
   nodeLabels:
+    # node.kubernetes.io/gpu: "true" # darg-ops-change
     topology.kubernetes.io/region: main
   sysctls:
     fs.inotify.max_user_instances: "8192"
@@ -83,7 +108,7 @@ cluster:
     {% endif %}
   clusterName: main
   controlPlane:
-    endpoint: https://192.168.1.203:6443
+    endpoint: https://192.168.1.203:6443  # darg-ops-change
   discovery:
     enabled: true
     registries:
@@ -115,7 +140,7 @@ cluster:
         - level: Metadata
     certSANs:
       - k8s.internal
-      - 192.168.1.203
+      - 192.168.1.203 # darg-ops-change
     disablePodSecurityPolicy: true
     extraArgs:
       enable-aggregator-routing: "true"
@@ -140,6 +165,23 @@ cluster:
     disabled: true
     image: registry.k8s.io/kube-proxy:v1.34.1
   scheduler:
+    #config:  # darg-ops-change
+    #  apiVersion: kubescheduler.config.k8s.io/v1  # darg-ops-change
+    #  kind: KubeSchedulerConfiguration  # darg-ops-change
+    #  profiles:  # darg-ops-change
+    #    - schedulerName: default-scheduler  # darg-ops-change
+    #      plugins:  # darg-ops-change
+    #        score:  # darg-ops-change
+    #          disabled:  # darg-ops-change
+    #            - name: ImageLocality  # darg-ops-change
+    #      pluginConfig:  # darg-ops-change
+    #        - name: PodTopologySpread  # darg-ops-change
+    #          args:  # darg-ops-change
+    #            defaultingType: List  # darg-ops-change
+    #            defaultConstraints:  # darg-ops-change
+    #              - maxSkew: 1  # darg-ops-change
+    #                topologyKey: kubernetes.io/hostname  # darg-ops-change
+    #                whenUnsatisfiable: ScheduleAnyway  # darg-ops-change
     extraArgs:
       bind-address: 0.0.0.0
     image: registry.k8s.io/kube-scheduler:v1.34.1
@@ -147,8 +189,16 @@ cluster:
   serviceAccount:
     key: op://darg-home-ops/talos/CLUSTER_SERVICEACCOUNT_KEY
   {% endif %}
----
-apiVersion: v1alpha1
-kind: WatchdogTimerConfig
-device: /dev/watchdog0
-timeout: 5m
+#---  # darg-ops-change
+#apiVersion: v1alpha1  # darg-ops-change
+#kind: UserVolumeConfig  # darg-ops-change
+#name: local-hostpath  # darg-ops-change
+#provisioning:  # darg-ops-change
+#  diskSelector:  # darg-ops-change
+#    match: disk.model == "Corsair MP600 MICRO" && !system_disk  # darg-ops-change
+#  minSize: 1TB  # darg-ops-change
+#---  # darg-ops-change
+#apiVersion: v1alpha1  # darg-ops-change
+#kind: WatchdogTimerConfig  # darg-ops-change
+#device: /dev/watchdog0  # darg-ops-change
+#timeout: 5m  # darg-ops-change

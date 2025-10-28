@@ -19,9 +19,9 @@ spec:
       masquerade: true
       preallocateMaps: true
       tproxy: true
-      # tproxy: true
+    bpfClockProbe: true
     bgpControlPlane:
-      enabled: false
+      enabled: false # darg-ops-change
     cgroup:
       automount:
         enabled: false
@@ -30,7 +30,7 @@ spec:
       exclusive: false
     dashboards:
       enabled: true
-    devices: bond+
+    devices: enp+ # darg-ops-change
     enableIPv4BIGTCP: true
     endpointRoutes:
       enabled: true
@@ -46,7 +46,7 @@ spec:
     kubeProxyReplacement: true
     kubeProxyReplacementHealthzBindAddr: 0.0.0.0:10256
     l2announcements:
-      enabled: false
+      enabled: true # darg-ops-change
     loadBalancer:
       algorithm: maglev
       mode: dsr
@@ -58,10 +58,10 @@ spec:
         enabled: true
         serviceMonitor:
           enabled: true
-      replicas: 1
+      replicas: 1 # darg-ops-change
       rollOutPods: true
-    pmtuDiscovery:
-      enabled: true
+    pmtuDiscovery: # darg-ops-change
+      enabled: false # darg-ops-change
     prometheus:
       enabled: true
       serviceMonitor:

@@ -10,8 +10,6 @@ spec:
   dependsOn:
     - name: multus-networks
       namespace: kube-system
-    - name: mosquitto
-      namespace: default
     - name: openebs
       namespace: openebs-system
   interval: 1h

@@ -18,10 +18,10 @@ spec:
           app:
             image:
               repository: ghcr.io/home-operations/home-assistant
-              tag: 2025.10.2@sha256:7f38ac027c09d5bc21f2e9cb5c2356dad46d356ae2f41a4e3acd8d8320e8f1eb
+              tag: 2025.10.4@sha256:25a113a6d3e42ac66ba6b4172300b8c9a66f91e707a03cab5ad454910ca37eeb
             env:
               TZ: Europe/Warsaw
-              HASS_HTTP_TRUSTED_PROXY_1: 192.168.1.0/24
+              HASS_HTTP_TRUSTED_PROXY_1: 192.168.1.0/24 # darg-ops-change
               HASS_HTTP_TRUSTED_PROXY_2: 10.42.0.0/16
             envFrom:
               - secretRef:
@@ -36,6 +36,14 @@ spec:
               limits:
                 memory: 2Gi
     defaultPodOptions:
+      # annotations:  # darg-ops-change
+      #   k8s.v1.cni.cncf.io/networks: |-  # darg-ops-change
+      #     [{  # darg-ops-change
+      #       "name": "iot",  # darg-ops-change
+      #       "namespace": "kube-system",  # darg-ops-change
+      #       "ips": ["192.168.70.20/24"],  # darg-ops-change
+      #       "mac": "c6:07:27:af:fb:53"  # darg-ops-change
+      #     }]  # darg-ops-change
       securityContext:
         runAsNonRoot: true
         runAsUser: 1000
@@ -59,7 +67,6 @@ spec:
         parentRefs:
           - name: envoy-external
             namespace: network
-            sectionName: https
     persistence:
       config:
         existingClaim: "{{ .Release.Name }}"

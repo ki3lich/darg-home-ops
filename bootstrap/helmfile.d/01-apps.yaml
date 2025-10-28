@@ -10,7 +10,7 @@ releases:
   - name: cilium
     namespace: kube-system
     chart: oci://ghcr.io/home-operations/charts-mirror/cilium
-    version: 1.18.2
+    version: 1.18.3
     values:
       - ./templates/values.yaml.gotmpl
     hooks:
@@ -18,7 +18,7 @@ releases:
         command: bash
         args:
           - -c
-          - until kubectl get crd ciliumloadbalancerippools.cilium.io ciliumbgpadvertisements.cilium.io ciliumbgppeerconfigs.cilium.io ciliumbgpclusterconfigs.cilium.io &>/dev/null; do sleep 5; done
+          - until kubectl get crd ciliumloadbalancerippools.cilium.io &>/dev/null; do sleep 5; done # darg-ops-change
         events:
           - postsync
         showlogs: true
@@ -43,6 +43,15 @@ releases:
     needs:
       - kube-system/cilium
 
+  # - name: spegel  # darg-ops-change
+  #   namespace: kube-system  # darg-ops-change
+  #   chart: oci://ghcr.io/spegel-org/helm-charts/spegel  # darg-ops-change
+  #   version: 0.4.0  # darg-ops-change
+  #   values:  # darg-ops-change
+  #     - ./templates/values.yaml.gotmpl  # darg-ops-change
+  #   needs:  # darg-ops-change
+  #     - kube-system/coredns  # darg-ops-change
+
   - name: cert-manager
     namespace: cert-manager
     chart: oci://quay.io/jetstack/charts/cert-manager
@@ -50,7 +59,7 @@ releases:
     values:
       - ./templates/values.yaml.gotmpl
     needs:
-      - kube-system/coredns
+      - kube-system/coredns # darg-ops-change
 
   - name: flux-operator
     namespace: flux-system

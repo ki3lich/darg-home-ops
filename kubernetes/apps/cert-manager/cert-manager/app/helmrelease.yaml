@@ -18,3 +18,7 @@ spec:
       enabled: true
       servicemonitor:
         enabled: true
+    # webhook:  # darg-ops-change
+    #   replicaCount: 2  # darg-ops-change
+    #   podDisruptionBudget:  # darg-ops-change
+    #     enabled: true  # darg-ops-change

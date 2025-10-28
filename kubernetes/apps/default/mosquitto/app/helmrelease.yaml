@@ -12,6 +12,7 @@ spec:
   values:
     controllers:
       mosquitto:
+        type: statefulset
         containers:
           app:
             image:
@@ -22,12 +23,18 @@ spec:
             securityContext:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true
-              capabilities: {drop: ["ALL"]}
+              capabilities: { drop: ["ALL"] }
             resources:
               requests:
                 cpu: 10m
               limits:
                 memory: 100Mi
+        statefulset:
+          volumeClaimTemplates:
+            - name: config
+              storageClass: openebs-hostpath
+              accessMode: ReadWriteOnce
+              size: 5Gi
     defaultPodOptions:
       securityContext:
         runAsNonRoot: true
@@ -42,7 +49,7 @@ spec:
           external-dns.alpha.kubernetes.io/hostname: mosquitto.darg.win
           gatus.home-operations.com/endpoint: |-
             group: services
-          lbipam.cilium.io/ips: 192.168.69.129
+          lbipam.cilium.io/ips: 192.168.1.129 # darg-ops-change
         externalTrafficPolicy: Local
         ports:
           mqtt:
@@ -59,8 +66,6 @@ spec:
             persistence true
             persistence_location /config
     persistence:
-      config:
-        existingClaim: "{{ .Release.Name }}"
       config-file:
         type: configMap
         identifier: config

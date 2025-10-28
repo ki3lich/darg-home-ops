@@ -3,7 +3,7 @@ set shell := ['bash', '-euo', 'pipefail', '-c']
 
 scripts_dir := justfile_dir() + '/scripts'
 talos_dir := justfile_dir() + '/talos'
-controller := `talosctl config info -o yaml | yq -e '.endpoints[0]'`
+controller := '192.168.1.203' # darg-ops-change
 
 [private]
 default:
@@ -39,7 +39,7 @@ render-config node:
 [doc('Reset a node')]
 reset-node node:
     gum confirm "Reset node {{ node }}?" --default="No" && \
-        talosctl -n "{{ node }}" reset --graceful=false --reboot || exit 0
+        talosctl -n "{{ node }}" reset --graceful=false --reboot || exit 0  # darg-ops-change
 
 [doc('Shutdown a node')]
 shutdown-node node:
