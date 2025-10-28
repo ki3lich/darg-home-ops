@@ -8,8 +8,6 @@ spec:
   components:
     - ../../../../components/volsync
   dependsOn:
-    - name: multus-networks
-      namespace: kube-system
     - name: openebs
       namespace: openebs-system
   interval: 1h
