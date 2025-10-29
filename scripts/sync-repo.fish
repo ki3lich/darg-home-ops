@@ -205,7 +205,6 @@ if command -v rsync >/dev/null
         kubernetes/apps/kube-system/intel-device-plugin-operator/ \
         kubernetes/apps/kube-system/intel-gpu-resource-driver/ \
         kubernetes/apps/kube-system/multus/ \
-        kubernetes/apps/kube-system/snapshot-controller/ \
         kubernetes/apps/kube-system/spegel/ \
         kubernetes/apps/observability/blackbox-exporter/ \
         kubernetes/apps/observability/fluent-bit/ \
