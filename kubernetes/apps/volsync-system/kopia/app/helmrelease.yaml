@@ -73,9 +73,12 @@ spec:
       config-file:
         type: secret
         identifier: kopia-repository-secret
-        globalMounts:
-          - path: /config/repository.config
-            subPath: repository.config
+        advancedMounts:
+          kopia:
+            app:
+              - path: /config/repository.config
+                subPath: repository.config
+                readOnly: true
       # repository:
       #   type: emptyDir
       #   globalMounts:
