@@ -33,8 +33,9 @@ spec:
             resources:
               requests:
                 cpu: 10m
+                memory: 128Mi
               limits:
-                memory: 2Gi
+                memory: 1Gi
     defaultPodOptions:
       # annotations:  # darg-ops-change
       #   k8s.v1.cni.cncf.io/networks: |-  # darg-ops-change
