@@ -44,7 +44,7 @@ spec:
             securityContext:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true
-              capabilities: {drop: ["ALL"]}
+              capabilities: { drop: ["ALL"] }
             resources:
               requests:
                 cpu: 10m
@@ -69,35 +69,17 @@ spec:
         parentRefs:
           - name: envoy-internal
             namespace: network
-    configMaps:
-      config:
-        data:
-          repository.config: |-
-            {
-              "storage": {
-                "type": "filesystem",
-                "config": {
-                  "path": "/repository"
-                }
-              },
-              "hostname": "volsync.{{ .Release.Namespace }}.svc.cluster.local",
-              "username": "volsync",
-              "description": "volsync",
-              "enableActions": false
-            }
     persistence:
       config-file:
-        type: configMap
-        identifier: config
+        type: secret
+        identifier: kopia-repository-secret
         globalMounts:
           - path: /config/repository.config
             subPath: repository.config
-      repository:
-        type: nfs
-        server: expanse.internal
-        path: /mnt/eros/VolsyncKopia
-        globalMounts:
-          - path: /repository
+      # repository:
+      #   type: emptyDir
+      #   globalMounts:
+      #     - path: /repository
       tmpfs:
         type: emptyDir
         advancedMounts:
