@@ -40,7 +40,5 @@ spec:
     txtPrefix: k8s.
     domainFilters:
       - darg.win
-    serviceMonitor:
-      enabled: true
     podAnnotations:
       secret.reloader.stakater.com/reload: *secret

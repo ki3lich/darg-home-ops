@@ -11,14 +11,5 @@ spec:
   interval: 1h
   values:
     leaderElect: true
-    serviceMonitor:
-      enabled: true
-    grafanaDashboard:
-      enabled: true
-    certController:
-      serviceMonitor:
-        enabled: true
     webhook:
       replicaCount: 1 # darg-ops-change
-      serviceMonitor:
-        enabled: true
