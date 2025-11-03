@@ -77,10 +77,6 @@ spec:
         globalMounts:
           - path: /config/repository.config
             subPath: repository.config
-      # repository:
-      #   type: emptyDir
-      #   globalMounts:
-      #     - path: /repository
       tmpfs:
         type: emptyDir
         advancedMounts:
