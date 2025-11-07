@@ -16,7 +16,7 @@
       automerge: true,
       automergeType: "pr",
       matchUpdateTypes: ["minor", "patch"],
-      matchPackageNames: ["/kube-prometheus-stack/", "/reloader/", "/ghcr.io/home-operations/home-assistant/"],
+      matchPackageNames: ["/kube-prometheus-stack/", "/reloader/", "/ghcr.io/home-operations/home-assistant/", "/ghcr.io/home-operations/charts/tuppr/"],
       ignoreTests: false,
     },
     {
