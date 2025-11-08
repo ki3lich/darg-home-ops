@@ -16,7 +16,7 @@
       automerge: true,
       automergeType: "pr",
       matchUpdateTypes: ["minor", "patch"],
-      matchPackageNames: ["/kube-prometheus-stack/", "/reloader/", "/ghcr.io/home-operations/home-assistant/", "/ghcr.io/home-operations/charts/tuppr/", "/ghcr.io/external-secrets/charts/external-secrets/"],
+      matchPackageNames: ["/kube-prometheus-stack/", "/reloader/", "/ghcr.io/home-operations/home-assistant/", "/ghcr.io/home-operations/charts/tuppr/", "/ghcr.io/external-secrets/charts/external-secrets/", "/mirror.gcr.io/cloudflare/cloudflared/"],
       ignoreTests: false,
     },
     {
