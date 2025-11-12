@@ -21,10 +21,10 @@
         "/ghcr.io/home-operations/charts/tuppr/",
         "/ghcr.io/home-operations/home-assistant/",
         "/kube-prometheus-stack/",
-        "/mirror.gcr.io/cloudflare/cloudflared/"
+        "/mirror.gcr.io/cloudflare/cloudflared/",
         "/reloader/",
-        "ghcr.io/home-operations/charts-mirror/cilium",
-        "mirror.gcr.io/envoyproxy/gateway-helm"
+        "/ghcr.io/home-operations/charts-mirror/cilium/",
+        "/mirror.gcr.io/envoyproxy/gateway-helm/"
       ],
       ignoreTests: false,
     },
