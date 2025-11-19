@@ -20,6 +20,7 @@
         "/ghcr.io/external-secrets/charts/external-secrets/",
         "/ghcr.io/home-operations/charts/tuppr/",
         "/ghcr.io/home-operations/home-assistant/",
+        "/ghcr.io/home-operations/kopia/",
         "/kube-prometheus-stack/",
         "/mirror.gcr.io/cloudflare/cloudflared/",
         "/reloader/",
