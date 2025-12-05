@@ -18,14 +18,15 @@
       matchUpdateTypes: ["minor", "patch"],
       matchPackageNames: [
         "/ghcr.io/external-secrets/charts/external-secrets/",
+        "/ghcr.io/home-operations/charts-mirror/cilium/",
         "/ghcr.io/home-operations/charts/tuppr/",
         "/ghcr.io/home-operations/home-assistant/",
         "/ghcr.io/home-operations/kopia/",
         "/kube-prometheus-stack/",
         "/mirror.gcr.io/cloudflare/cloudflared/",
-        "/reloader/",
-        "/ghcr.io/home-operations/charts-mirror/cilium/",
-        "/mirror.gcr.io/envoyproxy/gateway-helm/"
+        "/mirror.gcr.io/envoyproxy/envoy/",
+        "/mirror.gcr.io/envoyproxy/gateway-helm/",
+        "/reloader/"
       ],
       ignoreTests: false,
     },
