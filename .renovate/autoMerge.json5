@@ -26,6 +26,7 @@
         "/mirror.gcr.io/cloudflare/cloudflared/",
         "/mirror.gcr.io/envoyproxy/envoy/",
         "/mirror.gcr.io/envoyproxy/gateway-helm/",
+        "/quay.io/jetstack/charts/cert-manager/",
         "/reloader/"
       ],
       ignoreTests: false,
