@@ -23,6 +23,7 @@
         "/ghcr.io/controlplaneio-fluxcd/charts/flux-operator/",
         "/ghcr.io/controlplaneio-fluxcd/flux-operator-manifests/",
         "/ghcr.io/external-secrets/charts/external-secrets/",
+        "/ghcr.io/home-operations/actions-runner/",
         "/ghcr.io/home-operations/charts-mirror/cilium/",
         "/ghcr.io/home-operations/charts-mirror/external-dns/",
         "/ghcr.io/home-operations/charts-mirror/volsync-perfectra1n/",
@@ -37,6 +38,17 @@
         "/mirror.gcr.io/envoyproxy/gateway-helm/",
         "/quay.io/jetstack/charts/cert-manager/",
         "/reloader/"
+      ],
+      ignoreTests: false,
+    },
+    {
+      description: "Auto-merge OCI Charts",
+      matchDatasources: ["docker"],
+      automerge: true,
+      automergeType: "pr",
+      matchUpdateTypes: ["major"],
+      matchPackageNames: [
+        "/ghcr.io/mendhak/http-https-echo/"
       ],
       ignoreTests: false,
     },
