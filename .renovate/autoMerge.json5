@@ -53,6 +53,17 @@
       ignoreTests: false,
     },
     {
+      description: "Auto-merge OCI Charts",
+      matchDatasources: ["docker"],
+      automerge: true,
+      automergeType: "pr",
+      matchUpdateTypes: ["patch"],
+      matchPackageNames: [
+        "/ghcr.io/bjw-s-labs/helm/app-template/"
+      ],
+      ignoreTests: false,
+    },
+    {
       description: "Auto-merge GitHub Actions",
       matchManagers: ["github-actions"],
       automerge: true,
