@@ -22,6 +22,7 @@
         "/ghcr.io/controlplaneio-fluxcd/charts/flux-instance/",
         "/ghcr.io/controlplaneio-fluxcd/charts/flux-operator/",
         "/ghcr.io/controlplaneio-fluxcd/flux-operator-manifests/",
+        "/ghcr.io/coredns/charts/coredns/",
         "/ghcr.io/external-secrets/charts/external-secrets/",
         "/ghcr.io/home-operations/actions-runner/",
         "/ghcr.io/home-operations/charts-mirror/cilium/",
@@ -46,9 +47,10 @@
       matchDatasources: ["docker"],
       automerge: true,
       automergeType: "pr",
-      matchUpdateTypes: ["major"],
+      matchUpdateTypes: ["major", "minor", "patch"],
       matchPackageNames: [
-        "/ghcr.io/mendhak/http-https-echo/"
+        "/ghcr.io/mendhak/http-https-echo/",
+        "/mirror.gcr.io/cloudflare/cloudflared/"
       ],
       ignoreTests: false,
     },
