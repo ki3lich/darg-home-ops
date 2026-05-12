@@ -96,5 +96,23 @@
       matchPackageNames: ["/external-dns/", "/gateway-api/", "/prometheus-operator/"],
       ignoreTests: true,
     },
+    {
+      description: "Auto-merge 1Password Connect",
+      matchDatasources: ["docker"],
+      automerge: true,
+      automergeType: "pr",
+      matchUpdateTypes: ["minor", "patch"],
+      matchPackageNames: ["/1password/"],
+      ignoreTests: false,
+    },
+    {
+      description: "Auto-merge Talos",
+      matchDatasources: ["docker"],
+      automerge: true,
+      automergeType: "pr",
+      matchUpdateTypes: ["patch"],
+      matchPackageNames: ["/ghcr.io/siderolabs/installer/"],
+      ignoreTests: false,
+    },
   ],
 }
