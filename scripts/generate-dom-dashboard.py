@@ -132,8 +132,7 @@ home_view = view(
             heading("Piwnica", icon="mdi:home-floor-b"),
             tile("switch.nous_zawor_wody_glowny", "Zawór główny",
                  tap_more_info=True),
-            tile("switch.oxt_brama_biuro_state", "Brama piwnica",
-                 tap_more_info=True),
+            cover_tile("cover.brama_piwnica", "Brama piwnica"),
         ]),
         section([
             heading("Więcej"),

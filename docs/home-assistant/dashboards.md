@@ -219,3 +219,78 @@ Conventions to keep when editing it:
   more-info dialog.
 - `climate.gree_climate` is a stale duplicate of `climate.gree_climate_2`'s
   device and is deliberately excluded.
+
+## Template covers (PVC-only config)
+
+Some gates have a momentary trigger (fires the motor) and a separate contact
+sensor (actual position), with no native `cover` entity to fuse them. We expose
+those as a **template cover** defined inline in `/config/configuration.yaml`.
+Like the storage-mode dashboards, `configuration.yaml` is hand-edited on the
+PVC and not reconciled by Flux (ADR-0002) — the snippet below is the reviewable
+source of the entity, not a git artifact.
+
+### `cover.brama_piwnica` — Brama piwnica (garage gate)
+
+The OXT device `oxt_brama_biuro` exposes a momentary trigger
+(`switch.oxt_brama_biuro_state`) and a `garage_door` contact
+(`binary_sensor.oxt_brama_biuro_garage_door_contact`; `off` = closed, `on` =
+anything else — opening / fully open / closing / stopped mid-travel). The
+template cover fuses them: state comes from the contact, open/close fire the
+toggle. Open and close are **guarded** — open is a no-op when the
+contact reads `on` (already not-closed), close a no-op when it reads `off`
+(already closed) — so a tap on the button you're looking at can never send the
+gate the wrong way. There is deliberately **no `stop`**: travel direction can't
+be detected from a binary contact, so "stop" would be an unguarded toggle that
+reverses the gate at an endpoint. To stop/reverse mid-travel, use the OXT
+switch's more-info dialog.
+
+```yaml
+template:
+  - cover:
+      - name: Brama piwnica
+        device_class: garage
+        state: "{{ 'open' if is_state('binary_sensor.oxt_brama_biuro_garage_door_contact', 'on') else 'closed' }}"
+        open_cover:
+          - condition: state
+            entity_id: binary_sensor.oxt_brama_biuro_garage_door_contact
+            state: "off"
+          - action: switch.toggle
+            target:
+              entity_id: switch.oxt_brama_biuro_state
+        close_cover:
+          - condition: state
+            entity_id: binary_sensor.oxt_brama_biuro_garage_door_contact
+            state: "on"
+          - action: switch.toggle
+            target:
+              entity_id: switch.oxt_brama_biuro_state
+```
+
+### Dashboard tile
+
+The dashboard binds a `cover_tile("cover.brama_piwnica", "Brama piwnica")` —
+`features: [cover-open-close]`, no `tap_action` override, so the tile body opens
+the more-info dialog and the face buttons do the guarded open/close. This
+deliberately relaxes the "both gates use `tap_action: more-info`" convention:
+the open/close buttons are guarded (a no-op at the wrong endpoint), not a blind
+single-tap toggle, so one tap can't send the gate the wrong way. The other gate
+(`script.brama_przelacz`) and the water valve keep explicit `more-info` because
+their single tap *is* an unguarded toggle.
+
+### Deploy order (template before dashboard)
+
+`scripts/generate-dom-dashboard.py` validates every referenced entity against
+`/api/states`, so `cover.brama_piwnica` must exist **before** the dashboard
+generator runs. Deploy the `template:` section as a `configuration.yaml` change
+per `pod-operations.md` (back up → write `.new` → `hass --script check_config`
+→ atomic move → restart), then verify `cover.brama_piwnica` in `/api/states`
+(reads `closed` when the gate is shut). Only then run
+`scripts/generate-dom-dashboard.py` and deploy the dashboard JSON per the
+"Editing a storage-mode dashboard" flow.
+
+### Polarity convention
+
+`off` = closed is HA's `garage_door` convention and matches this sensor's
+ground truth (verified: gate physically closed → contact `off`). If a future
+contact reads inverted, wrap the `state` template with a `not` and flip the
+guard conditions rather than editing the contact.
