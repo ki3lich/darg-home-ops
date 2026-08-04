@@ -172,11 +172,36 @@ The pattern to flatten when dropping those addons:
   hand-listed tiles. Because the tiles are explicit, **the dashboard will not
   auto-follow** later area/floor changes in HA — adding a new blind means
   editing the dashboard. That is the trade-off for dropping auto-entities.
-- Cover controls: a `tile` card with `features: [{type: cover-open},
-  {type: cover-close}]` preserves one-tap open/close without an addon.
+- Cover controls: a `tile` card with `features: [{type: cover-open-close}]`
+  (or the separate `{type: cover-open}` / `{type: cover-close}` pair)
+  preserves one-tap open/close without an addon. `dashboard-dom-2` uses the
+  combined form.
 - Cameras: a `tile` with `show_entity_picture: true` renders a live snapshot on
   the face — no `picture-entity` or webrtc addon needed.
 
 The converted dashboard lives at `dashboard-dom-2` (file
 `lovelace.dashboard_dom_2`) alongside the original, so the two can be compared
 before the old one is retired.
+
+## dashboard-dom-2 layout conventions (2026-08 redesign)
+
+`dashboard-dom-2` is **room-based**, not domain-based: the Home view has one
+section per room (Salon, Kuchnia i jadalnia, Sypialnia, Biuro, Podwórko, Woda),
+and each section holds that room's covers, lights, climate, and media as native
+tile cards. Subviews: `gora` (upstairs rooms, one section each), `kamery`,
+`klimatyzacje` (units not already shown in a room section).
+
+Conventions to keep when editing it:
+
+- **New device → add a tile to its room section manually.** No auto-entities,
+  so the dashboard does not follow area/floor changes on its own.
+- **Critical controls use `tap_action: more-info`** — the main water valve and
+  both gates must not toggle on a single tap. Lights keep the default
+  tap-to-toggle.
+- **Alert tiles are conditional**: leak sensors sit in a heading-less top
+  section with `visibility: [state == on]` — invisible when dry, present when
+  triggered. Add future alert sensors the same way.
+- Cover tiles carry `features: [cover-open-close]`; positioning stays in the
+  more-info dialog.
+- `climate.gree_climate` is a stale duplicate of `climate.gree_climate_2`'s
+  device and is deliberately excluded.
