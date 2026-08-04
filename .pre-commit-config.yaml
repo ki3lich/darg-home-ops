@@ -4,7 +4,10 @@ repos:
     hooks:
       - id: check-yaml
         args: [--allow-multiple-documents]
-        exclude: ^mf-base-chart/templates/
+        # HA blueprints use the !input tag, which PyYAML safe_load cannot
+        # construct — same class of false-fail pod-operations.md warns about
+        # for !include. Helm templates below carry Go-template syntax.
+        exclude: ^(mf-base-chart/templates/|docs/home-assistant/blueprints/)
       - id: trailing-whitespace
       - id: check-added-large-files
       - id: check-merge-conflict

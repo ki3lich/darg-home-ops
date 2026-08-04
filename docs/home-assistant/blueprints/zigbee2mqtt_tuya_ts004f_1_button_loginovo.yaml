@@ -1,0 +1,98 @@
+---
+blueprint:
+  name: Zigbee2MQTT - Tuya 1-Button Smart Button (TS004F / Loginovo ZG-101ZL)
+  description: >
+    Automate the Loginovo ZG-101ZL smart button (Tuya TS004F, manufacturer
+    _TZ3000_ja5osu5g) via Zigbee2MQTT using MQTT device triggers.
+
+    The button exposes three actions — single press, double press, and long
+    press (~2s hold) — each wired to an independent action you choose.
+
+
+    **One-time setup** (do this once per device, then never again):
+
+    1. In the Zigbee2MQTT frontend, set the device's `operation_mode` to
+       `event`. In the default `command` mode the button emits `on` / `off` /
+       `brightness_*` payloads for group control, and the single / double /
+       hold triggers below will never fire.
+    2. After pairing (or after switching `operation_mode`), press the button
+       once for *each* action type — single, double, and long press. Home
+       Assistant only registers an MQTT device trigger after it has seen the
+       matching action at least once.
+
+    This blueprint uses MQTT **device triggers**, not the `event.*_action`
+    entity (which would require `homeassistant.experimental_event_entities:
+    true` in the Zigbee2MQTT config — not enabled on this cluster) nor the
+    legacy `sensor.*_action` state trigger (which mis-fires on HA restart
+    because the action payload is retained). See
+    `docs/home-assistant/blueprints.md` for the full rationale.
+  domain: automation
+  source_url: https://raw.githubusercontent.com/ki3lich/darg-home-ops/main/docs/home-assistant/blueprints/zigbee2mqtt_tuya_ts004f_1_button_loginovo.yaml
+  input:
+    remote_device:
+      name: Tuya TS004F Smart Button (Loginovo ZG-101ZL)
+      description: >
+        Select the paired button device (integration: MQTT). Look for a
+        Loginovo ZG-101ZL — zigbee model TS004F, manufacturer _TZ3000_ja5osu5g.
+        Ensure `operation_mode: event` is set on the device first (see the
+        blueprint description above).
+      selector:
+        device:
+          integration: mqtt
+          multiple: false
+    single_press_action:
+      name: Single press action
+      description: Action to run on a single press
+      default: []
+      selector:
+        action: {}
+    double_press_action:
+      name: Double press action
+      description: Action to run on a double press
+      default: []
+      selector:
+        action: {}
+    long_press_action:
+      name: Long press action
+      description: Action to run on a long press (~2s hold)
+      default: []
+      selector:
+        action: {}
+
+mode: single
+max_exceeded: silent
+
+trigger:
+  - device_id: !input remote_device
+    domain: mqtt
+    platform: device
+    type: action
+    subtype: single
+    id: single
+  - device_id: !input remote_device
+    domain: mqtt
+    platform: device
+    type: action
+    subtype: double
+    id: double
+  - device_id: !input remote_device
+    domain: mqtt
+    platform: device
+    type: action
+    subtype: hold
+    id: hold
+
+action:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id: single
+        sequence: !input single_press_action
+      - conditions:
+          - condition: trigger
+            id: double
+        sequence: !input double_press_action
+      - conditions:
+          - condition: trigger
+            id: hold
+        sequence: !input long_press_action
