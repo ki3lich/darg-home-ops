@@ -3,9 +3,11 @@
 
 Room-based layout (see docs/home-assistant/dashboards.md):
 - Home: Alerty (conditional leak tiles), Salon, Kuchnia i jadalnia, Sypialnia,
-  Biuro, Podwórko, Woda, Więcej (nav headings).
-- Subviews: Góra (room sections), Kamery, Klimatyzacja.
+  Biuro, Podwórko, Piwnica, Więcej (nav headings).
+- Subviews: Góra (room sections), Kamery, Klimatyzacja, Piwnica (valve + gate).
 - Native cards only. Critical controls (water valve, gates) tap_action=more-info.
+- The main water valve is conditional on Home (visible only when closed) and
+  always-visible in the Piwnica subview.
 
 Usage:
     export HASS_TOKEN=$(op read op://darg-home-ops/claude/password)
@@ -24,7 +26,7 @@ import urllib.request
 HASS_URL = "https://hass.darg.win"
 
 def tile(entity, name=None, features=None, picture=False, tap_more_info=False,
-         visibility=None):
+         visibility=None, icon=None):
     t = {
         "type": "tile",
         "entity": entity,
@@ -41,6 +43,8 @@ def tile(entity, name=None, features=None, picture=False, tap_more_info=False,
         t["tap_action"] = {"action": "more-info"}
     if visibility:
         t["visibility"] = visibility
+    if icon:
+        t["icon"] = icon
     return t
 
 def cover_tile(entity, name=None):
@@ -129,9 +133,13 @@ home_view = view(
                     navigate="/dashboard-dom-2/kamery"),
         ]),
         section([
-            heading("Piwnica", icon="mdi:home-floor-b"),
+            heading("Piwnica", icon="mdi:home-floor-b",
+                    navigate="/dashboard-dom-2/piwnica"),
             tile("switch.nous_zawor_wody_glowny", "Zawór główny",
-                 tap_more_info=True),
+                 tap_more_info=True, icon="mdi:pipe-valve",
+                 visibility=[{"condition": "state",
+                              "entity": "switch.nous_zawor_wody_glowny",
+                              "state": "off"}]),
             cover_tile("cover.brama_piwnica", "Brama piwnica"),
         ]),
         section([
@@ -196,11 +204,24 @@ klima_view = view(
     ],
 )
 
+piwnica_view = view(
+    "Piwnica", "mdi:home-floor-b", path="piwnica", subview=True,
+    sections=[
+        section([
+            heading("Piwnica"),
+            tile("switch.nous_zawor_wody_glowny", "Zawór główny",
+                 tap_more_info=True, icon="mdi:pipe-valve"),
+            cover_tile("cover.brama_piwnica", "Brama piwnica"),
+        ]),
+    ],
+)
+
 config = {
     "version": 1,
     "minor_version": 1,
     "key": "lovelace.dashboard_dom_2",
-    "data": {"config": {"views": [home_view, gora_view, kamery_view, klima_view]}},
+    "data": {"config": {"views": [home_view, gora_view, kamery_view, klima_view,
+                                  piwnica_view]}},
 }
 
 # --- validation: every referenced entity must exist in /api/states ---

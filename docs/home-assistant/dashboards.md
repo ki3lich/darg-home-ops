@@ -191,7 +191,8 @@ section per room (Salon, Kuchnia i jadalnia, Sypialnia, Biuro, Podwórko,
 Piwnica),
 and each section holds that room's covers, lights, climate, and media as native
 tile cards. Subviews: `gora` (upstairs rooms, one section each), `kamery`,
-`klimatyzacje` (units not already shown in a room section).
+`klimatyzacje` (units not already shown in a room section), `piwnica` (the main
+water valve and basement gate, always visible).
 
 Conventions to keep when editing it:
 
@@ -212,6 +213,19 @@ Conventions to keep when editing it:
 - **Critical controls use `tap_action: more-info`** — the main water valve and
   both gates must not toggle on a single tap. Lights keep the default
   tap-to-toggle.
+- **The main water valve is dual-placed.** On Home it sits in the Piwnica
+  section and is **conditional** (`visibility: [state == off]` — visible only
+  when the valve is closed, i.e. the water is off; hidden when open or
+  `unavailable`, matching the leak-tile convention). In the `piwnica` subview
+  it is always visible, so the water can be shut off from the dashboard even
+  when the valve is open (and thus hidden on Home). Both tiles use
+  `tap_action: more-info` and `icon: mdi:pipe-valve`.
+- **The Piwnica section heading navigates to the `piwnica` subview.** Unlike
+  other room headings (which are inert), the Piwnica heading carries
+  `tap_action: navigate` because Piwnica has a detail subview and no entry in
+  the Więcej section. Góra/Klimatyzacja reach their subviews via Więcej
+  subtitles instead, because they have no Home section. The asymmetry is
+  deliberate, not a copy-paste mistake to "fix."
 - **Alert tiles are conditional**: leak sensors sit in a heading-less top
   section with `visibility: [state == on]` — invisible when dry, present when
   triggered. Add future alert sensors the same way.
@@ -268,9 +282,10 @@ template:
 
 ### Dashboard tile
 
-The dashboard binds a `cover_tile("cover.brama_piwnica", "Brama piwnica")` —
-`features: [cover-open-close]`, no `tap_action` override, so the tile body opens
-the more-info dialog and the face buttons do the guarded open/close. This
+The dashboard binds `cover.brama_piwnica` as a `cover_tile` in both the Home
+Piwnica section and the `piwnica` subview — `features: [cover-open-close]`, no
+`tap_action` override, so the tile body opens the more-info dialog and the face
+buttons do the guarded open/close. This
 deliberately relaxes the "both gates use `tap_action: more-info`" convention:
 the open/close buttons are guarded (a no-op at the wrong endpoint), not a blind
 single-tap toggle, so one tap can't send the gate the wrong way. The other gate
