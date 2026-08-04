@@ -1,5 +1,6 @@
 .private/
 .pytest_cache/
+__pycache__
 .task/
 .venv/
 *.crt
