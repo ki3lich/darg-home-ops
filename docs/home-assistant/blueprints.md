@@ -13,14 +13,16 @@ The pod name is ephemeral. Address it by label selector:
 POD=$(kubectl -n default get pod -l app.kubernetes.io/name=home-assistant -o name | head -1)
 ```
 
-## Blueprint sources are reviewable YAML, deployed by hand
+## Blueprint sources are reviewable YAML, deployed with the change
 
 Like the `cover.brama_piwnica` template snippet documented in `dashboards.md`,
 a blueprint is **reviewable source, not a reconciled artifact**. The reviewable
 YAML lives under `docs/home-assistant/blueprints/` in this repo; the live copy
-is hand-placed on the PVC at `/config/blueprints/automation/`. Nothing in this
-repo reconciles the live copy — see ADR-0002 for why `/config` is treated as
-HA's mutable state.
+is copied to `/config/blueprints/automation/` on the PVC. Nothing in this repo
+reconciles the live copy (Flux does not sync `/config` — see ADR-0002), so a
+deploy is an explicit step, not a push-to-main consequence. That deploy is
+performed as part of landing the change, not left as a manual follow-up: the
+agent that authors the blueprint also copies it onto the PVC and reloads HA.
 
 Per blueprint (so far):
 
@@ -33,8 +35,10 @@ A new blueprint is a single new file copied onto the PVC, so this flow is
 shorter than the `configuration.yaml` and storage-mode dashboard flows in
 `pod-operations.md` / `dashboards.md`: there is no existing copy to back up
 (no `.bak` step), and a malformed blueprint surfaces as a validation error
-when you create an automation from it in the UI (step 4) — the natural
-check point — rather than as a boot failure.
+when an automation is created from it (step 4) — the natural check point —
+rather than as a boot failure. Steps 1-3 (copy, chown, reload) are performed
+as part of landing the change; step 4 is the one manual step, because it
+encodes household intent.
 
 1. **Copy** the YAML onto the pod:
 
@@ -52,20 +56,45 @@ check point — rather than as a boot failure.
       chmod 644 /config/blueprints/automation/<name>.yaml'
    ```
 
-3. **Load it.** Unlike `configuration.yaml` and the `.storage` lovelace files
-   (which HA caches in memory and does not watch — so they need a pod
-   restart), blueprints are re-scanned on a reload. Try **Developer Tools →
-   YAML → Reload Automations** (and Reload Blueprints if shown) first; the new
-   blueprint should appear in Settings → Automations → Blueprints. If it
-   doesn't, fall back to a pod restart — the restart always works:
+3. **Reload.** Unlike `configuration.yaml` and the `.storage` lovelace files
+   (which HA caches in memory and does not watch — so an external edit needs a
+   pod restart), blueprints are re-scanned on an automation reload with **no
+   restart and no downtime**. Call the reload over the API with the long-lived
+   token from `pod-operations.md`:
 
    ```sh
-   kubectl -n default delete $POD
+   export HASS_TOKEN=$(op read op://darg-home-ops/claude/password)
+   curl -fsS -o /dev/null -w "%{http_code}\n" -X POST \
+     -H "Authorization: Bearer $HASS_TOKEN" -H "Content-Type: application/json" \
+     https://hass.darg.win/api/services/automation/reload -d '{}'
+   # expect 200
    ```
 
-4. **Create an automation** from the blueprint in the UI:
-   Settings → Automations → Blueprints → pick the blueprint → fill the inputs
-   (the button device, and an action for each press type).
+   Verify the blueprint registered — `blueprint/list` over the websocket API
+   returns the filename among the automation blueprints (needs the
+   `websocket-client` PyPI package):
+
+   ```sh
+   python3 - <<'PY'
+   import os, json, websocket
+   ws = websocket.create_connection("wss://hass.darg.win/api/websocket")
+   ws.recv()
+   ws.send(json.dumps({"type":"auth","access_token":os.environ["HASS_TOKEN"]})); ws.recv()
+   ws.send(json.dumps({"type":"blueprint/list","id":1,"domain":"automation"}))
+   assert any("<name>.yaml" == b for b in json.loads(ws.recv())["result"]), "blueprint not registered"
+   print("registered")
+   ws.close()
+   PY
+   ```
+
+   A pod restart (`kubectl -n default delete $POD`) is only a fallback if the
+   reload does not pick the file up — it has not been needed in practice.
+
+4. **Create an automation** from the blueprint. This is the one step that
+   stays manual, because it encodes household intent — what each press *does*
+   is a decision, not a deploy: Settings → Automations → Blueprints → pick
+   the blueprint → fill the inputs (the button device, and an action for each
+   press type).
 
 ## Zigbee2MQTT device triggers — why not the event entity or the action sensor
 
@@ -120,6 +149,11 @@ Keep these when adding a new blueprint:
   `<integration>_<vendor>_<button-count>_button_<commercial>.yaml` for
   button remotes (mirroring the existing TS004F blueprint). The file is the
   verbatim source copied to the PVC.
+- **Deploy with the change, not after it.** A new or edited blueprint is
+  copied to `/config/blueprints/automation/` on the PVC and HA reloaded as
+  part of landing the change (the "Deploying a blueprint" flow above), not
+  left as a manual follow-up. Creating the automation *instance* (assigning
+  the per-press actions) is a separate, human step — it encodes intent.
 - **Use device triggers, not event entities or action-sensor state triggers**
   (see above). Key the `trigger:` block with `id:` tags and dispatch with
   `condition: trigger` + `id` in a `choose:` — no Jinja string comparison
