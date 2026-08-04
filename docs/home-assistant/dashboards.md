@@ -43,9 +43,10 @@ There are three sources, and they disagree. Know which one you're reading.
 registered entities *plus* `input_boolean.*`, `input_button.*`, `automation.*`,
 `person.*`, `sun.sun`, `weather.*`, template sensors, and everything else. This
 is the only source that covers the lot. Needs a long-lived access token
-(HA UI → Profile → Long-Lived Access Tokens).
+(HA UI → Profile → Long-Lived Access Tokens). The token lives in 1Password:
 
 ```sh
+export HASS_TOKEN=$(op read op://darg-home-ops/claude/password)
 curl -s -H "Authorization: Bearer $HASS_TOKEN" https://hass.darg.win/api/states > states.json
 ```
 
@@ -193,8 +194,20 @@ tile cards. Subviews: `gora` (upstairs rooms, one section each), `kamery`,
 
 Conventions to keep when editing it:
 
-- **New device → add a tile to its room section manually.** No auto-entities,
-  so the dashboard does not follow area/floor changes on its own.
+- **Regenerate, don't hand-edit JSON.** `scripts/generate-dom-dashboard.py`
+  emits the full config and validates every referenced entity against
+  `/api/states` (live fetch, or `--states dump.json`) before writing output:
+
+  ```sh
+  export HASS_TOKEN=$(op read op://darg-home-ops/claude/password)
+  scripts/generate-dom-dashboard.py          # writes /tmp/lovelace.dashboard_dom_2.new.json
+  ```
+
+  Then deploy with the "Editing a storage-mode dashboard" flow above. The
+  dashboard JSON itself stays storage-mode (ADR-0002) — the script is the
+  reviewable source of its structure, not a reconciled artifact.
+- **New device → add a tile to its room section in the generator.** No
+  auto-entities, so the dashboard does not follow area/floor changes on its own.
 - **Critical controls use `tap_action: more-info`** — the main water valve and
   both gates must not toggle on a single tap. Lights keep the default
   tap-to-toggle.
