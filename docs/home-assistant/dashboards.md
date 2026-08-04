@@ -187,7 +187,8 @@ before the old one is retired.
 ## dashboard-dom-2 layout conventions (2026-08 redesign)
 
 `dashboard-dom-2` is **room-based**, not domain-based: the Home view has one
-section per room (Salon, Kuchnia i jadalnia, Sypialnia, Biuro, Podwórko, Woda),
+section per room (Salon, Kuchnia i jadalnia, Sypialnia, Biuro, Podwórko,
+Piwnica),
 and each section holds that room's covers, lights, climate, and media as native
 tile cards. Subviews: `gora` (upstairs rooms, one section each), `kamery`,
 `klimatyzacje` (units not already shown in a room section).

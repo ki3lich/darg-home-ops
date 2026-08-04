@@ -129,7 +129,7 @@ home_view = view(
                     navigate="/dashboard-dom-2/kamery"),
         ]),
         section([
-            heading("Woda", icon="mdi:water"),
+            heading("Piwnica", icon="mdi:home-floor-b"),
             tile("switch.nous_zawor_wody_glowny", "Zawór główny",
                  tap_more_info=True),
             tile("switch.oxt_brama_biuro_state", "Brama piwnica",
